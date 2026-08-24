@@ -1,11 +1,13 @@
 package controllers
 
 import (
-	"backend/internal/database"
-	"backend/internal/models"
+	"net/http"
 	"strconv"
 
-	"github.com/gofiber/fiber/v2"
+	"backend/internal/database"
+	"backend/internal/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 type RoleRequest struct {
@@ -21,10 +23,11 @@ type RoleResponse struct {
 	Permissions []models.Permission `json:"permissions"`
 }
 
-func GetRoles(c *fiber.Ctx) error {
+func GetRoles(c *gin.Context) {
 	var roles []models.Role
 	if err := database.DB.Preload("Permissions").Find(&roles).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal mengambil data role"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal mengambil data role"})
+		return
 	}
 
 	var response []RoleResponse
@@ -37,21 +40,23 @@ func GetRoles(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(response)
+	c.JSON(http.StatusOK, response)
 }
 
-func GetPermissions(c *fiber.Ctx) error {
+func GetPermissions(c *gin.Context) {
 	var permissions []models.Permission
 	if err := database.DB.Find(&permissions).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal mengambil data permission"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal mengambil data permission"})
+		return
 	}
-	return c.JSON(permissions)
+	c.JSON(http.StatusOK, permissions)
 }
 
-func CreateRole(c *fiber.Ctx) error {
+func CreateRole(c *gin.Context) {
 	var req RoleRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Input tidak valid"})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Input tidak valid"})
+		return
 	}
 
 	var permissions []models.Permission
@@ -66,26 +71,29 @@ func CreateRole(c *fiber.Ctx) error {
 	}
 
 	if err := database.DB.Create(&role).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal membuat role"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat role"})
+		return
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+	c.JSON(http.StatusCreated, gin.H{
 		"message": "Role berhasil dibuat",
 		"id":      strconv.Itoa(int(role.ID)),
 	})
 }
 
-func UpdateRole(c *fiber.Ctx) error {
-	id := c.Params("id")
+func UpdateRole(c *gin.Context) {
+	id := c.Param("id")
 	var role models.Role
 
 	if err := database.DB.First(&role, id).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Role tidak ditemukan"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Role tidak ditemukan"})
+		return
 	}
 
 	var req RoleRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Input tidak valid"})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Input tidak valid"})
+		return
 	}
 
 	var permissions []models.Permission
@@ -97,29 +105,32 @@ func UpdateRole(c *fiber.Ctx) error {
 	role.Description = req.Description
 
 	if err := database.DB.Save(&role).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal menyimpan role"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal menyimpan role"})
+		return
 	}
 
 	// Update permissions (many-to-many replace)
 	database.DB.Model(&role).Association("Permissions").Replace(permissions)
 
-	return c.JSON(fiber.Map{"message": "Role berhasil diupdate"})
+	c.JSON(http.StatusOK, gin.H{"message": "Role berhasil diupdate"})
 }
 
-func DeleteRole(c *fiber.Ctx) error {
-	id := c.Params("id")
+func DeleteRole(c *gin.Context) {
+	id := c.Param("id")
 	var role models.Role
 
 	if err := database.DB.First(&role, id).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Role tidak ditemukan"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Role tidak ditemukan"})
+		return
 	}
 
 	// Hapus relasi permissions terlebih dahulu
 	database.DB.Model(&role).Association("Permissions").Clear()
 
 	if err := database.DB.Delete(&role).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Gagal menghapus role"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal menghapus role"})
+		return
 	}
 
-	return c.JSON(fiber.Map{"message": "Role berhasil dihapus"})
+	c.JSON(http.StatusOK, gin.H{"message": "Role berhasil dihapus"})
 }

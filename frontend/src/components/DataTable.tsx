@@ -1,10 +1,13 @@
+import { useState } from "react"
 import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X } from "lucide-react"
 
 import {
   Table,
@@ -23,19 +26,8 @@ interface DataTableProps<TData, TValue> {
   isLoading?: boolean
   emptyMessage?: string
   emptySubMessage?: string
-
-  // Pagination
-  pageCount?: number
-  pageIndex?: number
-  onPageChange?: (page: number) => void
-  pageSize?: number
-  onPageSizeChange?: (pageSize: number) => void
-
-  // Search (Optional)
+  enableSearch?: boolean
   searchPlaceholder?: string
-  searchValue?: string
-  onSearchChange?: (value: string) => void
-  totalItems?: number
   extraFilters?: React.ReactNode
 }
 
@@ -45,49 +37,57 @@ export function DataTable<TData, TValue>({
   isLoading,
   emptyMessage = "Data tidak ditemukan",
   emptySubMessage,
-  pageCount = 1,
-  pageIndex = 1,
-  onPageChange,
-  pageSize = 10,
-  onPageSizeChange,
+  enableSearch = false,
   searchPlaceholder = "Cari...",
-  searchValue,
-  onSearchChange,
-  totalItems,
   extraFilters,
 }: DataTableProps<TData, TValue>) {
+  const [globalFilter, setGlobalFilter] = useState("")
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-    pageCount,
+    getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    state: {
+      globalFilter,
+      pagination,
+    },
   })
 
   return (
     <div className="space-y-4">
       {/* Top Filter Bar */}
-      {(onSearchChange !== undefined || totalItems !== undefined || extraFilters) && (
+      {(enableSearch || extraFilters) && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex items-center gap-4 flex-1">
-            {onSearchChange && (
+            {enableSearch && (
               <div className="relative flex-1 max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   placeholder={searchPlaceholder}
-                  className="pl-9"
-                  value={searchValue || ""}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="pl-9 pr-9"
+                  value={globalFilter ?? ""}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
                 />
+                {globalFilter && (
+                  <button onClick={() => setGlobalFilter("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             )}
             {extraFilters}
           </div>
-          {totalItems !== undefined && (
-            <p className="text-sm text-muted-foreground ml-auto hidden sm:block">
-              {totalItems} total data
-            </p>
-          )}
+          <p className="text-sm text-muted-foreground ml-auto hidden sm:block">
+            {table.getFilteredRowModel().rows.length} total data
+          </p>
         </div>
       )}
 
@@ -98,7 +98,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="h-10 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <TableHead key={header.id} className={`h-10 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider ${(header.column.columnDef.meta as any)?.className || ""}`}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -113,7 +113,6 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {isLoading && !data.length ? (
-              // Loading state only when no previous data exists
               Array.from({ length: 10 }).map((_, i) => (
                 <TableRow key={i}>
                   {columns.map((_, j) => (
@@ -124,21 +123,19 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : table.getRowModel().rows?.length ? (
-              <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className={`transition-colors hover:bg-muted/30 ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="px-4 py-1">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </>
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className={`transition-colors hover:bg-muted/30 ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className={`px-4 py-1 ${(cell.column.columnDef.meta as any)?.className || ""}`}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-32 text-center">
@@ -153,32 +150,27 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      {/* Modern Professional Pagination */}
-      {(pageCount > 1 || (data && data.length > 10)) && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1 pt-2 pb-6">
+      {/* Pagination */}
+      {(table.getPageCount() > 1 || table.getFilteredRowModel().rows.length > 10) && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1 pt-2 pb-0">
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground font-medium">
-              Halaman <span className="text-foreground">{pageIndex}</span> dari {pageCount}
+              Halaman <span className="text-foreground">{table.getState().pagination.pageIndex + 1}</span> dari {table.getPageCount()}
             </div>
-            {onPageSizeChange && (
-              <div className="flex items-center gap-2 border-l pl-4">
-                <p className="text-sm font-medium text-muted-foreground hidden sm:block">Tampilkan</p>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    onPageSizeChange(Number(e.target.value))
-                    if (onPageChange) onPageChange(1)
-                  }}
-                  className="h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
-                >
-                  {[10, 20, 30, 40, 50].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div className="flex items-center gap-2 border-l pl-4">
+              <p className="text-sm font-medium text-muted-foreground hidden sm:block">Tampilkan</p>
+              <select
+                value={table.getState().pagination.pageSize}
+                onChange={(e) => table.setPageSize(Number(e.target.value))}
+                className="h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+              >
+                {[10, 20, 30, 40, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -186,8 +178,8 @@ export function DataTable<TData, TValue>({
               variant="outline"
               size="icon"
               className="h-8 w-8 rounded-md"
-              onClick={() => onPageChange?.(1)}
-              disabled={pageIndex === 1 || isLoading}
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage() || isLoading}
             >
               <ChevronsLeft className="h-4 w-4" />
             </Button>
@@ -196,8 +188,8 @@ export function DataTable<TData, TValue>({
               variant="outline"
               size="icon"
               className="h-8 w-8 rounded-md"
-              onClick={() => onPageChange?.(pageIndex - 1)}
-              disabled={pageIndex === 1 || isLoading}
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage() || isLoading}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -206,8 +198,8 @@ export function DataTable<TData, TValue>({
               variant="outline"
               size="icon"
               className="h-8 w-8 rounded-md"
-              onClick={() => onPageChange?.(pageIndex + 1)}
-              disabled={pageIndex === pageCount || isLoading}
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage() || isLoading}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -216,8 +208,8 @@ export function DataTable<TData, TValue>({
               variant="outline"
               size="icon"
               className="h-8 w-8 rounded-md"
-              onClick={() => onPageChange?.(pageCount)}
-              disabled={pageIndex === pageCount || isLoading}
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage() || isLoading}
             >
               <ChevronsRight className="h-4 w-4" />
             </Button>

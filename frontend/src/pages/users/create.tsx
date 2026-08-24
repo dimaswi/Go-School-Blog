@@ -36,6 +36,10 @@ export default function UserCreate() {
     fetchRoles()
   }, [])
 
+  const hostname = window.location.hostname
+  const parts = hostname.split('.')
+  const isSubdomain = parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'domain'
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -43,7 +47,7 @@ export default function UserCreate() {
       const token = localStorage.getItem("token")
       await axios.post(`${API_URL}/users`, {
         ...formData,
-        role_id: Number(formData.role_id)
+        role_id: Number(formData.role_id) || 0
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -70,38 +74,45 @@ export default function UserCreate() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Tambah User Baru</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Buat akun pengguna baru untuk masuk ke sistem.</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Buat akun pengguna baru untuk sistem ini.</p>
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 px-4 md:px-6 lg:px-8 flex-1">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6 max-w-full">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6 w-full">
           <form id="user-form" onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2 max-w-2xl">
-              <Label htmlFor="name">Nama Lengkap</Label>
-              <Input id="name" placeholder="Masukkan nama lengkap" required value={formData.name} onChange={handleChange} />
-            </div>
-            <div className="space-y-2 max-w-2xl">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" placeholder="Masukkan username" required value={formData.username} onChange={handleChange} />
-            </div>
-            <div className="space-y-2 max-w-2xl">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="Masukkan password" required value={formData.password} onChange={handleChange} />
-            </div>
-            <div className="space-y-2 max-w-2xl">
-              <Label htmlFor="role_id">Role</Label>
-              <Select value={formData.role_id} onValueChange={v => setFormData({ ...formData, role_id: v })} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map(r => (
-                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-4">
+              <div className="space-y-2 w-full">
+                <Label htmlFor="name">Nama Lengkap</Label>
+                <Input id="name" placeholder="Masukkan nama lengkap" required value={formData.name} onChange={handleChange} />
+              </div>
+
+              <div className="space-y-2 w-full">
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" placeholder="Masukkan username" required value={formData.username} onChange={handleChange} />
+              </div>
+
+              <div className="space-y-2 w-full">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="Masukkan password" required value={formData.password} onChange={handleChange} />
+              </div>
+
+              {!isSubdomain && (
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="role_id">Role Akses</Label>
+                  <Select value={formData.role_id} onValueChange={v => setFormData({ ...formData, role_id: v })} required={!isSubdomain}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map(r => (
+                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </form>
         </div>

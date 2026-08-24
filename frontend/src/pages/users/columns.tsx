@@ -8,6 +8,8 @@ export type User = {
   name: string
   username: string
   role: string
+  school?: string
+  subdomain?: string
 }
 
 export const columns: ColumnDef<User>[] = [
@@ -18,6 +20,37 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "username",
     header: "Username",
+  },
+  {
+    accessorKey: "subdomain",
+    header: "Subdomain/Sekolah",
+    cell: ({ row }) => {
+      const user = row.original
+      if (!user.subdomain) return <span className="text-gray-400">-</span>
+      
+      const protocol = window.location.protocol
+      const host = window.location.host
+      let tenantUrl = ""
+      
+      if (host.includes("localhost") || host.includes("127.0.0.1")) {
+        // Handle localhost cases like admin.localhost:5173 or just localhost:5173
+        const baseHost = host.replace(/^[^.]+\./, "") // admin.localhost:5173 -> localhost:5173
+        tenantUrl = `${protocol}//${user.subdomain}.${baseHost.includes("localhost") ? baseHost : "localhost:5173"}`
+      } else {
+        // Production: replace current subdomain with tenant subdomain
+        const baseDomain = host.substring(host.indexOf(".") + 1)
+        tenantUrl = `${protocol}//${user.subdomain}.${baseDomain}`
+      }
+
+      return (
+        <div className="flex flex-col">
+          <a href={tenantUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+            {user.subdomain}
+          </a>
+          <span className="text-xs text-slate-500">{user.school}</span>
+        </div>
+      )
+    }
   },
   {
     accessorKey: "role",

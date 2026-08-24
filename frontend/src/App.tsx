@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppDialogProvider } from './context/AppDialogContext';
+import { SiteConfigProvider } from './context/SiteConfigContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/layout';
 import RoleRoute from './components/RoleRoute';
@@ -17,6 +18,20 @@ import RoleEdit from './pages/roles/edit';
 
 import Dashboard from './pages/dashboard/index';
 
+import SchoolsIndex from './pages/schools/index';
+import SchoolCreate from './pages/schools/create';
+
+import SchoolEdit from './pages/schools/edit';
+import SchoolShow from './pages/schools/show';
+
+import CategoriesIndex from './pages/categories/index';
+import CategoryCreate from './pages/categories/create';
+import CategoryEdit from './pages/categories/edit';
+
+import PostsIndex from './pages/posts/index';
+import PostCreate from './pages/posts/create';
+import PostEdit from './pages/posts/edit';
+
 function DashboardLayout() {
   return (
     <Layout>
@@ -26,17 +41,24 @@ function DashboardLayout() {
 }
 
 function App() {
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  const isSubdomain = parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'domain';
+
   return (
     <AuthProvider>
-      <AppDialogProvider>
-        <Router>
+      <SiteConfigProvider>
+        <AppDialogProvider>
+          <Router basename="/admin">
           <Routes>
             <Route path="/login" element={<Login />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<Dashboard />} />
-                
+
+                {/* Routes for Subdomains (Tenants) */}
+                {/* Always allow Users and Roles access if they have permission */}
                 <Route element={<RoleRoute permissions={["users.view", "users.create", "users.edit", "users.delete"]} />}>
                   <Route path="/users" element={<UsersIndex />} />
                   <Route path="/users/create" element={<UserCreate />} />
@@ -44,11 +66,33 @@ function App() {
                   <Route path="/users/:id/edit" element={<UserEdit />} />
                 </Route>
 
+                <Route element={<RoleRoute permissions={["posts.view", "posts.create", "posts.edit", "posts.delete"]} />}>
+                  <Route path="/posts" element={<PostsIndex />} />
+                  <Route path="/posts/create" element={<PostCreate />} />
+                  <Route path="/posts/:id/edit" element={<PostEdit />} />
+                </Route>
+
                 <Route element={<RoleRoute permissions={["roles.view", "roles.create", "roles.edit", "roles.delete"]} />}>
                   <Route path="/roles" element={<RolesIndex />} />
                   <Route path="/roles/create" element={<RoleCreate />} />
                   <Route path="/roles/:id/edit" element={<RoleEdit />} />
                 </Route>
+
+                {/* Routes for Root Domain (Super Admin) */}
+                {!isSubdomain && (
+                  <>
+                    <Route path="/schools" element={<SchoolsIndex />} />
+                    <Route path="/schools/create" element={<SchoolCreate />} />
+                    <Route path="/schools/:id" element={<SchoolShow />} />
+                    <Route path="/schools/:id/edit" element={<SchoolEdit />} />
+
+                    <Route element={<RoleRoute permissions={["categories.view", "categories.create", "categories.edit", "categories.delete"]} />}>
+                      <Route path="/categories" element={<CategoriesIndex />} />
+                      <Route path="/categories/create" element={<CategoryCreate />} />
+                      <Route path="/categories/:id/edit" element={<CategoryEdit />} />
+                    </Route>
+                  </>
+                )}
               </Route>
             </Route>
 
@@ -56,6 +100,7 @@ function App() {
           </Routes>
         </Router>
       </AppDialogProvider>
+      </SiteConfigProvider>
     </AuthProvider>
   );
 }

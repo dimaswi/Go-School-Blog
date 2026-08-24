@@ -2,18 +2,21 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Protected() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		authHeader := c.Get("Authorization")
+func Protected() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Missing or invalid token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Missing or invalid token"})
+			c.Abort()
+			return
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
@@ -30,20 +33,24 @@ func Protected() fiber.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid or expired token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid or expired token"})
+			c.Abort()
+			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid token claims"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token claims"})
+			c.Abort()
+			return
 		}
 
 		// Set user info to context for downstream handlers
-		c.Locals("userId", claims["sub"])
-		c.Locals("username", claims["username"])
-		c.Locals("userRole", claims["role"])
-		c.Locals("userPermissions", claims["permissions"])
+		c.Set("userId", claims["sub"])
+		c.Set("username", claims["username"])
+		c.Set("userRole", claims["role"])
+		c.Set("userPermissions", claims["permissions"])
 
-		return c.Next()
+		c.Next()
 	}
 }

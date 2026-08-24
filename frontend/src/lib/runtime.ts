@@ -13,7 +13,7 @@ function getWindowPort() {
 function isLocalDevServer() {
   if (typeof window === "undefined") return false
   const { hostname, port } = window.location
-  return (hostname === "localhost" || hostname === "127.0.0.1") && port === "5173"
+  return (hostname === "localhost" || hostname.endsWith(".localhost") || hostname === "127.0.0.1") && port === "5173"
 }
 
 export function getApiBase() {
