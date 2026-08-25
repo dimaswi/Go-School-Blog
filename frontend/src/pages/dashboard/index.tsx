@@ -19,7 +19,8 @@ export default function Dashboard() {
     parts.length >= 2 &&
     parts[0] !== "www" &&
     parts[0] !== "localhost" &&
-    parts[0] !== "domain"
+    parts[0] !== "domain" &&
+    parts[0] !== "literasidigital"
 
   useEffect(() => {
     const fetchStats = async () => {
