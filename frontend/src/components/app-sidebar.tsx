@@ -35,6 +35,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useSiteConfig } from "../context/SiteConfigContext"
+import { getTenantUrl } from "@/lib/runtime"
 import axios from "axios"
 
 type SchoolItem = {
@@ -222,7 +223,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuSub>
                           {schools.map((school) => {
                             const token = localStorage.getItem("token")
-                            const subdomainUrl = `http://${school.subdomain}.localhost:5173/admin/login?token=${token}`
+                            const subdomainUrl = `${getTenantUrl(school.subdomain)}/admin/login?token=${token}`
                             return (
                               <SidebarMenuSubItem key={school.ID}>
                                 <SidebarMenuSubButton asChild className="h-7">

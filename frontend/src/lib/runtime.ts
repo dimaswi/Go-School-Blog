@@ -35,7 +35,11 @@ export function getTenantUrl(subdomain: string) {
   }
 
   // Handle production domain scenarios
-  const baseHost = host.replace(/^[^.]+\./, ""); // Strips current subdomain
+  const parts = host.split('.');
+  // If we are already on a subdomain (e.g. admin.literasidigital.com), strip it to get the base domain
+  // If we are on the root domain (e.g. literasidigital.com), don't strip anything
+  const baseHost = parts.length > 2 && parts[0] !== 'www' ? host.replace(/^[^.]+\./, "") : host;
+
   return `${protocol}//${subdomain}.${baseHost}`;
 }
 
