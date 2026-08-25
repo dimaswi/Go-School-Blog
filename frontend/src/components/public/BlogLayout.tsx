@@ -352,7 +352,7 @@ export default function BlogLayout() {
               const isActive = location.pathname === targetPath || activeCategorySlug === cat.slug;
               const hasChildren = cat.children && cat.children.length > 0;
               const isExpanded = expandedMobileCats.includes(cat.ID);
-              
+
               return (
                 <div key={cat.ID} className="flex flex-col border-b border-slate-100 dark:border-slate-800/50 last:border-0 py-1">
                   <div className="flex items-center justify-between">
@@ -364,8 +364,8 @@ export default function BlogLayout() {
                       {cat.name}
                     </Link>
                     {hasChildren && (
-                      <button 
-                        onClick={() => setExpandedMobileCats(prev => prev.includes(cat.ID) ? prev.filter(id => id !== cat.ID) : [...prev, cat.ID])} 
+                      <button
+                        onClick={() => setExpandedMobileCats(prev => prev.includes(cat.ID) ? prev.filter(id => id !== cat.ID) : [...prev, cat.ID])}
                         className="p-2 text-slate-500"
                       >
                         <ChevronDown size={16} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -493,8 +493,8 @@ export default function BlogLayout() {
               <ul className="flex flex-col gap-2 text-[15px] md:text-sm">
                 {categories.slice(0, 5).map(cat => (
                   <li key={cat.ID}>
-                    <Link 
-                      to={cat.is_school_list || cat.slug === 'sekolahku' ? '/schools' : `/category/${cat.slug}`} 
+                    <Link
+                      to={cat.is_school_list || cat.slug === 'sekolahku' ? '/schools' : `/category/${cat.slug}`}
                       onClick={scrollToTop}
                       className="group flex items-center py-1 text-slate-400 hover:text-white hover:translate-x-1 transition-all"
                     >
@@ -533,10 +533,10 @@ export default function BlogLayout() {
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-12 md:mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-[13px] md:text-sm text-center md:text-left">
             <div className="text-slate-500">
-              &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-400">{schoolName || 'Literasi Digital'}</span>. Hak Cipta Dilindungi.
+              Copyright &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-400">2026 PPM EMCL PDPM Bojonegoro | Literasi Digital</span>. Hak Cipta Dilindungi.
             </div>
             <div className="text-slate-500 flex items-center gap-1">
               Dibuat dengan <span className="text-red-500">&hearts;</span> untuk pendidikan.
@@ -551,7 +551,7 @@ export default function BlogLayout() {
         className={`fixed bottom-6 right-6 md:bottom-8 md:right-8 p-3 md:p-4 rounded-xl bg-blue-600 text-white shadow-xl shadow-blue-900/20 hover:bg-blue-500 hover:-translate-y-1 transition-all duration-300 z-50 ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
         aria-label="Kembali ke atas"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6" /></svg>
       </button>
     </div>
   );
