@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies (ci is better for reproducible builds)
-RUN npm ci
+# Install dependencies (npm install used instead of ci to bypass lockfile sync issues)
+RUN npm install
 
 # Copy the rest of the application
 COPY . .
