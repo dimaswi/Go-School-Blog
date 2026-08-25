@@ -536,7 +536,7 @@ export default function BlogLayout() {
 
           <div className="mt-12 md:mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-[13px] md:text-sm text-center md:text-left">
             <div className="text-slate-500">
-              Copyright &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-400">2026 PPM EMCL PDPM Bojonegoro | Literasi Digital</span>. Hak Cipta Dilindungi.
+              &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-400">PPM EMCL PDPM Bojonegoro | Literasi Digital</span>. Hak Cipta Dilindungi.
             </div>
             <div className="text-slate-500 flex items-center gap-1">
               Dibuat dengan <span className="text-red-500">&hearts;</span> untuk pendidikan.
