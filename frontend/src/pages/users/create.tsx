@@ -40,7 +40,7 @@ export default function UserCreate() {
 
   const hostname = window.location.hostname
   const parts = hostname.split('.')
-  const isSubdomain = parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'domain'
+  const isSubdomain = parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'domain' && parts[0] !== 'literasidigital'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
