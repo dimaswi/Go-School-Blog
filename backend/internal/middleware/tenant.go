@@ -37,7 +37,7 @@ func TenantIdentifier() gin.HandlerFunc {
 		// If it's the root domain (or localhost without subdomain), no tenant is set
 		parts := strings.Split(host, ".")
 		
-		if len(parts) >= 2 && parts[0] != "www" && parts[0] != "localhost" && parts[0] != "domain" {
+		if len(parts) >= 2 && parts[0] != "www" && parts[0] != "localhost" && parts[0] != "domain" && parts[0] != "literasidigital" {
 			subdomain := parts[0]
 			var school models.School
 			if err := database.DB.Where("subdomain = ?", subdomain).First(&school).Error; err != nil {
