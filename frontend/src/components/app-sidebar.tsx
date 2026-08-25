@@ -56,7 +56,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     parts.length >= 2 &&
     parts[0] !== "www" &&
     parts[0] !== "localhost" &&
-    parts[0] !== "domain"
+    parts[0] !== "domain" &&
+    parts[0] !== "literasidigital"
 
   const isAdmin =
     user?.role?.toLowerCase() === "admin" ||
