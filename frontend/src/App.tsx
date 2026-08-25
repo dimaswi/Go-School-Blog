@@ -5,6 +5,11 @@ import { SiteConfigProvider } from './context/SiteConfigContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/layout';
 import RoleRoute from './components/RoleRoute';
+import BlogLayout from './components/public/BlogLayout';
+import Home from './pages/public/Home';
+import PostDetail from './pages/public/PostDetail';
+import PublicSchools from './pages/public/PublicSchools';
+import { Toaster } from 'react-hot-toast';
 
 import UsersIndex from './pages/users/index';
 import UserCreate from './pages/users/create';
@@ -17,6 +22,8 @@ import RoleCreate from './pages/roles/create';
 import RoleEdit from './pages/roles/edit';
 
 import Dashboard from './pages/dashboard/index';
+import Announcements from './pages/dashboard/Announcements';
+import SettingsIndex from './pages/settings/index';
 
 import SchoolsIndex from './pages/schools/index';
 import SchoolCreate from './pages/schools/create';
@@ -31,6 +38,9 @@ import CategoryEdit from './pages/categories/edit';
 import PostsIndex from './pages/posts/index';
 import PostCreate from './pages/posts/create';
 import PostEdit from './pages/posts/edit';
+import AdsIndex from './pages/admin/ads/index';
+import AdCreate from './pages/admin/ads/create';
+import AdEdit from './pages/admin/ads/edit';
 
 function DashboardLayout() {
   return (
@@ -49,57 +59,75 @@ function App() {
     <AuthProvider>
       <SiteConfigProvider>
         <AppDialogProvider>
-          <Router basename="/admin">
-          <Routes>
-            <Route path="/login" element={<Login />} />
+          <Toaster position="top-center" />
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route element={<BlogLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/schools" element={<PublicSchools />} />
+                <Route path="/post/:slug" element={<PostDetail />} />
+                <Route path="/category/:slug" element={<Home />} />
+              </Route>
 
-            <Route element={<ProtectedRoute />}>
-              <Route element={<DashboardLayout />}>
-                <Route path="/" element={<Dashboard />} />
+              {/* Admin Routes */}
+              <Route path="/admin">
+                <Route path="login" element={<Login />} />
 
-                {/* Routes for Subdomains (Tenants) */}
-                {/* Always allow Users and Roles access if they have permission */}
-                <Route element={<RoleRoute permissions={["users.view", "users.create", "users.edit", "users.delete"]} />}>
-                  <Route path="/users" element={<UsersIndex />} />
-                  <Route path="/users/create" element={<UserCreate />} />
-                  <Route path="/users/:id" element={<UserShow />} />
-                  <Route path="/users/:id/edit" element={<UserEdit />} />
-                </Route>
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="settings" element={<SettingsIndex />} />
 
-                <Route element={<RoleRoute permissions={["posts.view", "posts.create", "posts.edit", "posts.delete"]} />}>
-                  <Route path="/posts" element={<PostsIndex />} />
-                  <Route path="/posts/create" element={<PostCreate />} />
-                  <Route path="/posts/:id/edit" element={<PostEdit />} />
-                </Route>
+                    {/* Routes for Subdomains (Tenants) */}
+                    <Route element={<RoleRoute permissions={["users.view", "users.create", "users.edit", "users.delete"]} />}>
+                      <Route path="users" element={<UsersIndex />} />
+                      <Route path="users/create" element={<UserCreate />} />
+                      <Route path="users/:id" element={<UserShow />} />
+                      <Route path="users/:id/edit" element={<UserEdit />} />
+                    </Route>
 
-                <Route element={<RoleRoute permissions={["roles.view", "roles.create", "roles.edit", "roles.delete"]} />}>
-                  <Route path="/roles" element={<RolesIndex />} />
-                  <Route path="/roles/create" element={<RoleCreate />} />
-                  <Route path="/roles/:id/edit" element={<RoleEdit />} />
-                </Route>
+                    <Route element={<RoleRoute permissions={["posts.view", "posts.create", "posts.edit", "posts.delete"]} />}>
+                      <Route path="posts" element={<PostsIndex />} />
+                      <Route path="posts/create" element={<PostCreate />} />
+                      <Route path="posts/:id/edit" element={<PostEdit />} />
+                    </Route>
 
-                {/* Routes for Root Domain (Super Admin) */}
-                {!isSubdomain && (
-                  <>
-                    <Route path="/schools" element={<SchoolsIndex />} />
-                    <Route path="/schools/create" element={<SchoolCreate />} />
-                    <Route path="/schools/:id" element={<SchoolShow />} />
-                    <Route path="/schools/:id/edit" element={<SchoolEdit />} />
+                    <Route element={<RoleRoute permissions={["roles.view", "roles.create", "roles.edit", "roles.delete"]} />}>
+                      <Route path="roles" element={<RolesIndex />} />
+                      <Route path="roles/create" element={<RoleCreate />} />
+                      <Route path="roles/:id/edit" element={<RoleEdit />} />
+                    </Route>
+
+                    {/* Routes for Root Domain (Super Admin) */}
+                    {!isSubdomain && (
+                      <>
+                        <Route path="schools" element={<SchoolsIndex />} />
+                        <Route path="schools/create" element={<SchoolCreate />} />
+                        <Route path="schools/:id" element={<SchoolShow />} />
+                        <Route path="schools/:id/edit" element={<SchoolEdit />} />
+                      </>
+                    )}
 
                     <Route element={<RoleRoute permissions={["categories.view", "categories.create", "categories.edit", "categories.delete"]} />}>
-                      <Route path="/categories" element={<CategoriesIndex />} />
-                      <Route path="/categories/create" element={<CategoryCreate />} />
-                      <Route path="/categories/:id/edit" element={<CategoryEdit />} />
+                      <Route path="categories" element={<CategoriesIndex />} />
+                      <Route path="categories/create" element={<CategoryCreate />} />
+                      <Route path="categories/:id/edit" element={<CategoryEdit />} />
                     </Route>
-                  </>
-                )}
-              </Route>
-            </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-      </AppDialogProvider>
+                    <Route path="ads" element={<AdsIndex />} />
+                    <Route path="ads/create" element={<AdCreate />} />
+                    <Route path="ads/:id/edit" element={<AdEdit />} />
+
+                    <Route path="announcements" element={<Announcements />} />
+                  </Route>
+                </Route>
+              </Route>
+
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </AppDialogProvider>
       </SiteConfigProvider>
     </AuthProvider>
   );

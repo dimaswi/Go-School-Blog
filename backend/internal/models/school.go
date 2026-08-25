@@ -10,5 +10,11 @@ type School struct {
 	Subdomain string `json:"subdomain" gorm:"unique;index"`
 	Address   string `json:"address"`
 	Logo      string `json:"logo"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+	Facebook  string `json:"facebook"`
+	Twitter   string `json:"twitter"`
+	Instagram string `json:"instagram"`
+	Youtube   string `json:"youtube"`
 	Users     []User `json:"users" gorm:"foreignKey:SchoolID"`
 }

@@ -43,7 +43,7 @@ export default function RolesIndex() {
       description="Kelola peran dan hak akses sistem."
       actions={
         <Button size="sm" asChild>
-          <Link to="/roles/create">
+          <Link to="/admin/roles/create">
             <Plus className="mr-2 h-4 w-4" />
             Tambah Role
           </Link>

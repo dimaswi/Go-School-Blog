@@ -6,12 +6,12 @@ import Header from "./Header"
 export default function Layout({ children }: { children: React.ReactNode }) {
   // Persist sidebar open/close state ke localStorage
   const [open, setOpen] = useState<boolean>(() => {
-    const saved = localStorage.getItem("siak-sidebar-open")
+    const saved = localStorage.getItem("Literasi Digital-sidebar-open")
     return saved !== null ? saved === "true" : true
   })
 
   useEffect(() => {
-    localStorage.setItem("siak-sidebar-open", String(open))
+    localStorage.setItem("Literasi Digital-sidebar-open", String(open))
   }, [open])
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import axios from "axios"
 import PageShell from "@/components/PageShell"
 import { Button } from "@/components/ui/button"
@@ -7,14 +7,23 @@ import { Label } from "@/components/ui/label"
 import { useNavigate, Link } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { resolveAssetUrl } from "@/lib/runtime"
+import ReactQuill from "react-quill-new"
+import "react-quill-new/dist/quill.snow.css"
+import { useAuth } from "@/context/AuthContext"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
 
 export default function PostCreate() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const isSchoolAdmin = !!user?.school_id && user?.role?.toLowerCase() === "admin"
+  const isSuperAdmin = !user?.school_id || user?.role?.toLowerCase() === "super admin"
+  const canSetStatus = isSuperAdmin || isSchoolAdmin
+
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
+  const excerptRef = useRef<HTMLTextAreaElement>(null)
   
   const [formData, setFormData] = useState({
     title: "",
@@ -46,6 +55,13 @@ export default function PostCreate() {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
     setFormData(prev => ({ ...prev, title, slug }))
   }
+
+  useEffect(() => {
+    if (excerptRef.current) {
+      excerptRef.current.style.height = "auto"
+      excerptRef.current.style.height = excerptRef.current.scrollHeight + "px"
+    }
+  }, [formData.excerpt])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return
@@ -87,7 +103,7 @@ export default function PostCreate() {
       })
       
       toast.success("Artikel berhasil disimpan")
-      navigate("/posts")
+      navigate("/admin/posts")
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Gagal menyimpan artikel")
       console.error(error)
@@ -103,7 +119,7 @@ export default function PostCreate() {
       footer={
         <>
           <Button type="button" variant="outline" asChild>
-            <Link to="/posts">Batal</Link>
+            <Link to="/admin/posts">Batal</Link>
           </Button>
           <Button type="submit" form="post-form" disabled={loading} className="min-w-[140px]">
             {loading ? "Menyimpan..." : "Simpan Artikel"}
@@ -129,15 +145,14 @@ export default function PostCreate() {
               
               <div className="grid gap-2">
                 <Label htmlFor="content">Konten Berita *</Label>
-                {/* Temporary plain textarea, to be replaced by rich text editor later */}
-                <textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Tulis isi berita di sini..."
-                  className="min-h-[400px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  required
-                />
+                <div className="bg-white rounded-md">
+                  <ReactQuill 
+                    theme="snow"
+                    value={formData.content}
+                    onChange={(val) => setFormData({ ...formData, content: val })}
+                    className="quill-dynamic"
+                  />
+                </div>
               </div>
             </div>
           </form>
@@ -145,18 +160,20 @@ export default function PostCreate() {
 
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-6">
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
-            </div>
+            {canSetStatus && (
+              <div className="grid gap-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="category">Rubrik *</Label>
@@ -195,10 +212,11 @@ export default function PostCreate() {
               <Label htmlFor="excerpt">Kutipan Singkat (Excerpt)</Label>
               <textarea
                 id="excerpt"
+                ref={excerptRef}
                 value={formData.excerpt}
                 onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                 placeholder="Ringkasan berita..."
-                className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none overflow-hidden"
                 form="post-form"
               />
             </div>

@@ -33,7 +33,7 @@ export default function RoleRoute({ permissions }: RoleRouteProps) {
     run()
   }, [isUnauthorized, user, dialog, navigate, fallback])
 
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/admin/login" replace />
   if (isUnauthorized) return null
 
   return <Outlet />

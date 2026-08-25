@@ -47,7 +47,7 @@ export default function CategoryEdit() {
           setCategories(parentCats)
         } else {
           toast.error("Kategori tidak ditemukan")
-          navigate("/categories")
+          navigate("/admin/categories")
         }
       } catch (error) {
         console.error("Failed to fetch category", error)
@@ -80,7 +80,7 @@ export default function CategoryEdit() {
       })
       
       toast.success("Rubrik berhasil diperbarui")
-      navigate("/categories")
+      navigate("/admin/categories")
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Gagal memperbarui rubrik")
       console.error(error)
@@ -157,7 +157,7 @@ export default function CategoryEdit() {
 
           <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
             <Button type="button" variant="outline" asChild>
-              <Link to="/categories">Batal</Link>
+              <Link to="/admin/categories">Batal</Link>
             </Button>
             <Button type="submit" disabled={saving}>
               {saving ? "Menyimpan..." : "Simpan Perubahan"}

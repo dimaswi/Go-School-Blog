@@ -30,6 +30,8 @@ import {
   FileText,
   ChevronRight,
   ExternalLink,
+  Megaphone,
+  Bell,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useSiteConfig } from "../context/SiteConfigContext"
@@ -44,7 +46,7 @@ type SchoolItem = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
   const { user, logout } = useAuth()
-  const { schoolName, logoUrl } = useSiteConfig()
+  const { appName, schoolName, logoUrl } = useSiteConfig()
   const [schools, setSchools] = React.useState<SchoolItem[]>([])
   const [schoolsOpen, setSchoolsOpen] = React.useState(false)
 
@@ -76,16 +78,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Menu Utama
   navGroups.push({
     title: "Utama",
-    items: [{ title: "Dashboard", url: "/", icon: LayoutDashboard }],
+    items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard }],
   })
 
   // Menu Konten
   const kontenItems: any[] = []
-  if (!isSubdomain && (isAdmin || user?.permissions?.includes("categories.view"))) {
-    kontenItems.push({ title: "Rubrik (Nav)", url: "/categories", icon: Tag })
+  if (isAdmin || user?.permissions?.includes("categories.view")) {
+    kontenItems.push({ title: "Rubrik (Nav)", url: "/admin/categories", icon: Tag })
   }
   if (isAdmin || user?.permissions?.includes("posts.view")) {
-    kontenItems.push({ title: "Artikel Berita", url: "/posts", icon: FileText })
+    kontenItems.push({ title: "Artikel Berita", url: "/admin/posts", icon: FileText })
+  }
+  if (isAdmin) {
+    kontenItems.push({ title: "Manajemen Iklan", url: "/admin/ads", icon: Megaphone })
+  }
+  if (isAdmin) {
+    kontenItems.push({ title: "Pengumuman", url: "/admin/announcements", icon: Bell })
   }
   if (kontenItems.length > 0) {
     navGroups.push({ title: "Konten", items: kontenItems })
@@ -95,14 +103,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const sistemItems: any[] = []
   if (isSubdomain) {
     if (isAdmin || user?.permissions?.includes("users.view")) {
-      sistemItems.push({ title: "Pengguna", url: "/users", icon: Users })
+      sistemItems.push({ title: "Pengguna", url: "/admin/users", icon: Users })
+    }
+    if (isAdmin) {
+      sistemItems.push({ title: "Pengaturan", url: "/admin/settings", icon: Settings })
     }
   } else {
     if (isAdmin || user?.permissions?.includes("users.view")) {
-      sistemItems.push({ title: "Pengguna", url: "/users", icon: Users })
+      sistemItems.push({ title: "Pengguna", url: "/admin/users", icon: Users })
     }
     if (isAdmin || user?.permissions?.includes("roles.view")) {
-      sistemItems.push({ title: "Roles & Akses", url: "/roles", icon: Settings })
+      sistemItems.push({ title: "Roles & Akses", url: "/admin/roles", icon: Settings })
+    }
+    if (isAdmin) {
+      sistemItems.push({ title: "Pengaturan", url: "/admin/settings", icon: Settings })
     }
   }
   if (sistemItems.length > 0) {
@@ -123,7 +137,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
           <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-semibold text-sidebar-accent-foreground leading-tight truncate">
-              {schoolName}
+              {appName || schoolName}
             </span>
             <span className="text-[11px] text-sidebar-foreground/50 leading-tight">
               Admin Portal
@@ -141,10 +155,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
-                {group.items.map((item) => {
+                {group.items.map((item: any) => {
                   const isActive =
                     location.pathname === item.url ||
-                    (item.url !== "/" && location.pathname.startsWith(item.url))
+                    (item.url !== "/" && item.url !== "/admin" && location.pathname.startsWith(item.url))
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
@@ -182,7 +196,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     tooltip="Manajemen Sekolah"
                     className="h-8 rounded-md text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-medium"
                   >
-                    <Link to="/schools">
+                    <Link to="/admin/schools">
                       <School className="h-4 w-4 flex-shrink-0" />
                       <span className="text-sm">Semua Sekolah</span>
                     </Link>
@@ -206,7 +220,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <CollapsibleContent>
                         <SidebarMenuSub>
                           {schools.map((school) => {
-                            const subdomainUrl = `http://${school.subdomain}.localhost:5173`
+                            const token = localStorage.getItem("token")
+                            const subdomainUrl = `http://${school.subdomain}.localhost:5173/admin/login?token=${token}`
                             return (
                               <SidebarMenuSubItem key={school.ID}>
                                 <SidebarMenuSubButton asChild className="h-7">

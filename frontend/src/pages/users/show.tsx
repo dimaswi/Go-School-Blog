@@ -22,7 +22,7 @@ export default function UserShow() {
       <div className="px-4 md:px-6 lg:px-8 pt-4 pb-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild className="rounded-full bg-white shadow-sm border border-slate-200 h-9 w-9">
-            <Link to="/users">
+            <Link to="/admin/users">
               <ArrowLeft className="w-4 h-4 text-slate-600" />
             </Link>
           </Button>
@@ -64,10 +64,10 @@ export default function UserShow() {
 
       <div className="sticky bottom-0 z-50 flex justify-end gap-3 bg-background/95 backdrop-blur border-t p-4 mt-auto shadow-sm">
         <Button variant="outline" asChild>
-          <Link to="/users">Kembali</Link>
+          <Link to="/admin/users">Kembali</Link>
         </Button>
         <Button asChild className="min-w-[140px]">
-          <Link to={`/users/${user?.id}/edit`}>
+          <Link to={`/admin/users/${user?.id}/edit`}>
             <Edit className="h-4 w-4 mr-2" />
             Edit User
           </Link>

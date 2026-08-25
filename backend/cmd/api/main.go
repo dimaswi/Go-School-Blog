@@ -25,7 +25,7 @@ func main() {
 		// Jika gagal, coba load dari asumsi kita menjalankan `go run main.go` dari dalam folder `backend/cmd/api/`
 		err = godotenv.Overload("../../../.env")
 	}
-	
+
 	if err != nil {
 		log.Println("Error loading .env file, using environment variables")
 	}
@@ -34,7 +34,7 @@ func main() {
 	database.ConnectDB()
 
 	// Auto Migrate
-	database.DB.AutoMigrate(&models.School{}, &models.User{}, &models.Role{}, &models.Permission{}, &models.Category{}, &models.Post{})
+	database.DB.AutoMigrate(&models.School{}, &models.User{}, &models.Role{}, &models.Permission{}, &models.Category{}, &models.Post{}, &models.Setting{}, &models.Ad{}, &models.Announcement{})
 
 	// Seeder: Create Roles if they don't exist
 	roles := []struct {
@@ -70,7 +70,8 @@ func main() {
 		log.Println("Seeded default super admin user (username: superadmin, password: password123)")
 	}
 
-	// Seeder: Categories
+	// Seeder: Categories (Disabled)
+	/*
 	type subCategory struct {
 		Name string
 		Slug string
@@ -100,7 +101,7 @@ func main() {
 			cat = models.Category{Name: c.Name, Slug: c.Slug}
 			database.DB.Create(&cat)
 		}
-		
+
 		for _, child := range c.Children {
 			var childCat models.Category
 			if err := database.DB.Where("slug = ?", child.Slug).First(&childCat).Error; err != nil {
@@ -112,6 +113,7 @@ func main() {
 			}
 		}
 	}
+	*/
 
 	// Seeder: Permissions
 	permissionsList := []string{
@@ -158,29 +160,64 @@ func main() {
 		isTenant := ok && isTenantVal.(bool)
 
 		if isTenant {
-			schoolName, _ := c.Get("schoolName")
-			schoolLogo, _ := c.Get("schoolLogo")
-			c.JSON(http.StatusOK, gin.H{
-				"school_name": schoolName,
-				"logo_url":    schoolLogo,
-			})
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"school_name": "SiAK",
-				"logo_url":    "",
-			})
+			schoolID, _ := c.Get("schoolId")
+			var school models.School
+			if err := database.DB.First(&school, schoolID).Error; err == nil {
+				c.JSON(http.StatusOK, gin.H{
+					"school_name": school.Name,
+					"logo_url":    school.Logo,
+					"phone":       school.Phone,
+					"email":       school.Email,
+					"facebook":    school.Facebook,
+					"twitter":     school.Twitter,
+					"instagram":   school.Instagram,
+					"youtube":     school.Youtube,
+				})
+				return
+			}
+		} 
+		
+		// Fallback to Global / Super Admin settings
+		var settings []models.Setting
+		database.DB.Find(&settings)
+		config := gin.H{
+			"school_name": "Literasi Digital",
+			"logo_url":    "",
+			"phone":       "",
+			"email":       "",
+			"facebook":    "",
+			"twitter":     "",
+			"instagram":   "",
+			"youtube":     "",
 		}
+		for _, s := range settings {
+			config[s.Key] = s.Value
+		}
+		c.JSON(http.StatusOK, config)
 	})
+	api.GET("/public/categories", controllers.GetPublicCategories)
+	api.GET("/public/schools", controllers.GetPublicSchools)
+	api.GET("/public/posts", controllers.GetPublicPosts)
+	api.GET("/public/posts/:slug", controllers.GetPublicPost)
+	api.GET("/public/ads", controllers.GetPublicAds)
+	api.GET("/public/announcement", controllers.GetPublicAnnouncement)
 
 	// Serve Static Files
 	app.Static("/uploads", "./uploads")
 
 	// Protected Routes
 	protected := api.Group("/", middleware.Protected())
-	
+
 	// Upload
 	protected.POST("/upload", controllers.UploadFile)
 	
+	// Ads
+	protected.GET("/admin/ads", controllers.GetAds)
+	protected.GET("/admin/ads/:id", controllers.GetAd)
+	protected.POST("/admin/ads", controllers.CreateAd)
+	protected.PUT("/admin/ads/:id", controllers.UpdateAd)
+	protected.DELETE("/admin/ads/:id", controllers.DeleteAd)
+
 	// Super Admin routes
 	protected.POST("/schools", controllers.CreateSchool)
 	protected.GET("/schools", controllers.GetSchools)
@@ -197,7 +234,7 @@ func main() {
 		}
 
 		var user models.User
-		// The ID could be float64 from JWT claims, need to convert appropriately for GORM if needed. 
+		// The ID could be float64 from JWT claims, need to convert appropriately for GORM if needed.
 		// GORM usually handles basic types gracefully.
 		if err := database.DB.Preload("Role.Permissions").First(&user, userIDVal).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
@@ -215,9 +252,10 @@ func main() {
 			"username":    user.Username,
 			"role":        user.Role.Name,
 			"permissions": perms,
+			"school_id":   user.SchoolID,
 		})
 	})
-	
+
 	// API Khusus Manajemen Data
 	protected.GET("/dashboard/stats", controllers.GetDashboardStats)
 
@@ -245,6 +283,29 @@ func main() {
 	protected.POST("/posts", controllers.CreatePost)
 	protected.PUT("/posts/:id", controllers.UpdatePost)
 	protected.DELETE("/posts/:id", controllers.DeletePost)
+
+	// Post School Admin Requests
+	protected.POST("/posts/:id/submit-school", controllers.SubmitSchoolApproval)
+	protected.PUT("/posts/:id/approve-school", controllers.ApproveSchoolApproval)
+	protected.PUT("/posts/:id/reject-school", controllers.RejectSchoolApproval)
+
+	// Post Main Domain Requests
+	protected.POST("/posts/:id/request-main-domain", controllers.RequestMainDomain)
+	protected.PUT("/posts/:id/approve-main-domain", controllers.ApproveMainDomain)
+	protected.PUT("/posts/:id/reject-main-domain", controllers.RejectMainDomain)
+
+	// Settings
+	protected.GET("/settings", controllers.GetSettings)
+	protected.PUT("/settings", controllers.UpdateSettings)
+	protected.PUT("/settings/school", controllers.UpdateSchoolSettings)
+
+	// Announcements
+	protected.GET("/announcements", controllers.GetAnnouncements)
+	protected.POST("/announcements", controllers.CreateAnnouncement)
+	protected.PUT("/announcements/:id", controllers.UpdateAnnouncement)
+	protected.DELETE("/announcements/:id", controllers.DeleteAnnouncement)
+	protected.POST("/announcements/:id/activate", controllers.SetActiveAnnouncement)
+	protected.POST("/announcements/:id/deactivate", controllers.DeactivateAnnouncement)
 
 	// Get port from env
 	port := os.Getenv("PORT")

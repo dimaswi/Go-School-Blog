@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Save, Loader2 } from "lucide-react"
+import { toast } from "react-hot-toast"
+import { getApiBase } from "@/lib/runtime"
 
 export default function SchoolCreate() {
   const navigate = useNavigate()
@@ -32,7 +34,7 @@ export default function SchoolCreate() {
     setError("")
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+      const apiUrl = getApiBase()
       const token = localStorage.getItem("token")
       
       const res = await axios.post(`${apiUrl}/upload`, uploadData, {
@@ -61,15 +63,17 @@ export default function SchoolCreate() {
     setError("")
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+      const apiUrl = getApiBase()
       const token = localStorage.getItem("token")
       
       await axios.post(`${apiUrl}/schools`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       })
       
-      navigate("/schools")
+      toast.success("Sekolah berhasil ditambahkan")
+      navigate("/admin/schools")
     } catch (err: any) {
+      toast.error(err.response?.data?.message || "Gagal membuat sekolah")
       console.error("Failed to create school:", err)
       setError(err.response?.data?.message || "Gagal membuat sekolah")
     } finally {
@@ -82,7 +86,7 @@ export default function SchoolCreate() {
       <div className="px-4 md:px-6 lg:px-8 pt-4 pb-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild className="rounded-full bg-white shadow-sm border border-slate-200 h-9 w-9">
-            <Link to="/schools">
+            <Link to="/admin/schools">
               <ArrowLeft className="w-4 h-4 text-slate-600" />
             </Link>
           </Button>
@@ -170,7 +174,7 @@ export default function SchoolCreate() {
 
       <div className="sticky bottom-0 z-50 flex justify-end gap-3 bg-background/95 backdrop-blur border-t p-4 mt-auto shadow-sm">
         <Button type="button" variant="outline" asChild>
-          <Link to="/schools">Batal</Link>
+          <Link to="/admin/schools">Batal</Link>
         </Button>
         <Button type="submit" form="school-form" disabled={loading} className="min-w-[140px]">
           {loading ? (

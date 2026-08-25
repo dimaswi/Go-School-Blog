@@ -17,10 +17,26 @@ function isLocalDevServer() {
 }
 
 export function getApiBase() {
-  const envApiBase = import.meta.env.VITE_API_BASE
+  const envApiBase = import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_URL
   if (envApiBase) return trimTrailingSlash(envApiBase)
   if (isLocalDevServer()) return LEGACY_API_BASE
   return "/api"
+}
+
+export function getTenantUrl(subdomain: string) {
+  if (typeof window === "undefined") return `http://${subdomain}.localhost:5173`;
+  const host = window.location.host;
+  const protocol = window.location.protocol;
+
+  // Handle localhost scenarios
+  if (host.includes("localhost") || host.includes("127.0.0.1")) {
+    const baseHost = host.replace(/^[^.]+\./, ""); // e.g. admin.localhost:5173 -> localhost:5173
+    return `${protocol}//${subdomain}.${baseHost.includes("localhost") ? baseHost : "localhost:5173"}`;
+  }
+
+  // Handle production domain scenarios
+  const baseHost = host.replace(/^[^.]+\./, ""); // Strips current subdomain
+  return `${protocol}//${subdomain}.${baseHost}`;
 }
 
 export function getAssetBase() {

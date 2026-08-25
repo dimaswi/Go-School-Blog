@@ -7,6 +7,7 @@ import PageShell from "@/components/PageShell"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { Link } from "react-router-dom"
+import { getApiBase } from "@/lib/runtime"
 
 export default function UsersIndex() {
   const [data, setData] = useState<User[]>([])
@@ -15,7 +16,7 @@ export default function UsersIndex() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+        const apiUrl = getApiBase()
         const response = await axios.get(`${apiUrl}/users`)
         setData(response.data)
       } catch (error) {
@@ -34,7 +35,7 @@ export default function UsersIndex() {
       description="Kelola daftar pengguna sistem dan hak akses mereka."
       actions={
         <Button asChild>
-          <Link to="/users/create">
+          <Link to="/admin/users/create">
             <Plus className="mr-2 h-4 w-4" /> Tambah User
           </Link>
         </Button>

@@ -43,7 +43,7 @@ export default function Breadcrumbs() {
     <nav aria-label="Breadcrumb" className="flex items-center gap-1.5">
       {/* Home */}
       <Link
-        to="/"
+        to="/admin"
         className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
       >
         <Home className="h-4 w-4" />

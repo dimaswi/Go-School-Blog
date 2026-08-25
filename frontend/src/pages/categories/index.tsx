@@ -13,6 +13,7 @@ import {
   DragDropContext, Droppable, Draggable,
   type DropResult,
 } from "@hello-pangea/dnd"
+import { useAppDialog } from "@/context/AppDialogContext"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
 
@@ -62,6 +63,7 @@ export default function CategoriesIndex() {
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const { confirm: confirmDialog } = useAppDialog()
 
   const fetchCategories = async () => {
     try {
@@ -90,7 +92,8 @@ export default function CategoriesIndex() {
   }
 
   const handleDelete = async (cat: FlatNode) => {
-    if (!confirm(`Hapus rubrik "${cat.name}"?`)) return
+    const isConfirmed = await confirmDialog(`Hapus rubrik "${cat.name}"?`, "Hapus Rubrik")
+    if (!isConfirmed) return
     try {
       const token = localStorage.getItem("token")
       await axios.delete(`${API_URL}/categories/${cat.id}`, {
@@ -166,7 +169,7 @@ export default function CategoriesIndex() {
             </span>
           )}
           <Button size="sm" asChild>
-            <Link to="/categories/create">
+            <Link to="/admin/categories/create">
               <Plus className="mr-1.5 h-4 w-4" />
               Tambah Rubrik
             </Link>
@@ -189,7 +192,7 @@ export default function CategoriesIndex() {
             <p className="text-xs text-slate-400 mt-0.5">Mulai dengan menambah rubrik baru</p>
           </div>
           <Button size="sm" asChild>
-            <Link to="/categories/create">
+            <Link to="/admin/categories/create">
               <Plus className="mr-1.5 h-4 w-4" />
               Tambah Rubrik
             </Link>
@@ -348,7 +351,7 @@ export default function CategoriesIndex() {
                                     className="h-8 w-8 p-0 hover:bg-indigo-50 hover:text-indigo-600"
                                     asChild
                                   >
-                                    <Link to={`/categories/${node.id}/edit`}>
+                                    <Link to={`/admin/categories/${node.id}/edit`}>
                                       <Edit className="h-3.5 w-3.5" />
                                     </Link>
                                   </Button>

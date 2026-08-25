@@ -60,7 +60,7 @@ export default function CategoryCreate() {
       })
       
       toast.success("Rubrik berhasil dibuat")
-      navigate("/categories")
+      navigate("/admin/categories")
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Gagal membuat rubrik")
       console.error(error)
@@ -138,7 +138,7 @@ export default function CategoryCreate() {
 
           <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
             <Button type="button" variant="outline" asChild>
-              <Link to="/categories">Batal</Link>
+              <Link to="/admin/categories">Batal</Link>
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Menyimpan..." : "Simpan Rubrik"}

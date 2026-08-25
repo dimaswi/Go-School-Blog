@@ -13,8 +13,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
+import { getApiBase, getTenantUrl, resolveAssetUrl } from '@/lib/runtime'
 import { DataTable } from "@/components/DataTable"
 import type { ColumnDef } from "@tanstack/react-table"
+import { useAppDialog } from "@/context/AppDialogContext"
 
 export default function SchoolShow() {
   const { id } = useParams()
@@ -23,6 +25,7 @@ export default function SchoolShow() {
   const [school, setSchool] = useState<any>(null)
   const [tenantUsers, setTenantUsers] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("detail")
+  const { alert } = useAppDialog()
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
   const [users, setUsers] = useState<any[]>([])
@@ -31,7 +34,7 @@ export default function SchoolShow() {
 
   const fetchUsers = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+      const apiUrl = getApiBase()
       const token = localStorage.getItem("token")
       const res = await axios.get(`${apiUrl}/users`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -60,7 +63,7 @@ export default function SchoolShow() {
   const handleAssignAdmin = async () => {
     setAssigning(true)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+      const apiUrl = getApiBase()
       const token = localStorage.getItem("token")
 
       const currentAdminIds = tenantUsers.map(a => a.id)
@@ -96,7 +99,7 @@ export default function SchoolShow() {
       }
     } catch (err: any) {
       console.error(err)
-      alert(err.response?.data?.message || "Gagal meng-update admin")
+      await alert(err.response?.data?.message || "Gagal meng-update admin")
     } finally {
       setAssigning(false)
     }
@@ -105,7 +108,7 @@ export default function SchoolShow() {
   useEffect(() => {
     const fetchSchool = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+        const apiUrl = getApiBase()
         const token = localStorage.getItem("token")
 
         const res = await axios.get(`${apiUrl}/schools/${id}`, {
@@ -244,7 +247,7 @@ export default function SchoolShow() {
       <div className="flex flex-col items-center justify-center p-8 h-full">
         <div className="text-red-500 mb-4">{error || "Sekolah tidak ditemukan"}</div>
         <Button asChild variant="outline">
-          <Link to="/schools">Kembali ke Daftar Sekolah</Link>
+          <Link to="/admin/schools">Kembali ke Daftar Sekolah</Link>
         </Button>
       </div>
     )
@@ -255,13 +258,13 @@ export default function SchoolShow() {
       <div className="px-4 md:px-6 lg:px-8 pt-4 pb-3 border-b bg-white">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild className="rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 h-9 w-9 shrink-0">
-            <Link to="/schools">
+            <Link to="/admin/schools">
               <ArrowLeft className="w-4 h-4 text-slate-600" />
             </Link>
           </Button>
           {school.logo ? (
             <div className="w-12 h-12 flex items-center justify-center shrink-0 overflow-hidden">
-              <img src={school.logo.startsWith('http') ? school.logo : `http://localhost:8080${school.logo}`} alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
+              <img src={resolveAssetUrl(school.logo)} alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
             </div>
           ) : (
             <div className="w-12 h-12 bg-slate-50 border border-slate-200 rounded flex items-center justify-center shrink-0">
@@ -271,8 +274,8 @@ export default function SchoolShow() {
           <div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900">{school.name}</h1>
             <p className="text-sm text-blue-600 mt-0.5">
-              <a href={`http://${school.subdomain}.localhost:5173`} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                {school.subdomain}.localhost:5173
+              <a href={getTenantUrl(school.subdomain)} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                {getTenantUrl(school.subdomain).replace(/^https?:\/\//, '')}
               </a>
             </p>
           </div>
@@ -385,10 +388,10 @@ export default function SchoolShow() {
 
       <div className="sticky bottom-0 z-50 flex justify-end gap-3 bg-background/95 backdrop-blur border-t p-4 mt-auto shadow-sm">
         <Button type="button" variant="outline" asChild>
-          <Link to="/schools">Kembali</Link>
+          <Link to="/admin/schools">Kembali</Link>
         </Button>
         <Button asChild className="min-w-[140px]">
-          <Link to={`/schools/${school.ID}/edit`}>
+          <Link to={`/admin/schools/${school.ID}/edit`}>
             <Edit className="h-4 w-4 mr-2" /> Edit Sekolah
           </Link>
         </Button>

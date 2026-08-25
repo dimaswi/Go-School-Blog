@@ -8,6 +8,8 @@ import { Link, useNavigate } from "react-router-dom"
 import type { ColumnDef } from "@tanstack/react-table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAppDialog } from "@/context/AppDialogContext"
+import { toast } from "react-hot-toast"
+import { getApiBase, getTenantUrl } from "@/lib/runtime"
 
 export type School = {
   ID: number
@@ -25,7 +27,7 @@ export default function SchoolsIndex() {
 
   const fetchSchools = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+      const apiUrl = getApiBase()
       const token = localStorage.getItem("token")
       const response = await axios.get(`${apiUrl}/schools`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -50,13 +52,15 @@ export default function SchoolsIndex() {
 
     if (isConfirmed) {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+        const apiUrl = getApiBase()
         const token = localStorage.getItem("token")
         await axios.delete(`${apiUrl}/schools/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
+        toast.success("Sekolah berhasil dihapus")
         fetchSchools() // Refresh data
-      } catch (error) {
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Gagal menghapus sekolah")
         console.error("Failed to delete school:", error)
       }
     }
@@ -72,7 +76,7 @@ export default function SchoolsIndex() {
       header: "Subdomain",
       cell: ({ row }) => {
         const subdomain = row.original.subdomain
-        const url = `http://${subdomain}.localhost:5173`
+        const url = getTenantUrl(subdomain)
         return (
           <a 
             href={url} 
@@ -80,7 +84,7 @@ export default function SchoolsIndex() {
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline font-medium"
           >
-            {subdomain}.localhost:5173
+            {url.replace(/^https?:\/\//, '')}
           </a>
         )
       }
@@ -103,10 +107,10 @@ export default function SchoolsIndex() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate(`/schools/${school.ID}`)} className="cursor-pointer">
+              <DropdownMenuItem onClick={() => navigate(`/admin/schools/${school.ID}`)} className="cursor-pointer">
                 <Eye className="mr-2 h-4 w-4" /> Lihat Detail
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate(`/schools/${school.ID}/edit`)} className="cursor-pointer text-blue-600 focus:text-blue-600 focus:bg-blue-50">
+              <DropdownMenuItem onClick={() => navigate(`/admin/schools/${school.ID}/edit`)} className="cursor-pointer text-blue-600 focus:text-blue-600 focus:bg-blue-50">
                 <Edit className="mr-2 h-4 w-4" /> Edit Sekolah
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleDelete(school.ID, school.name)} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
@@ -125,7 +129,7 @@ export default function SchoolsIndex() {
       description="Kelola daftar tenant sekolah di dalam sistem."
       actions={
         <Button asChild>
-          <Link to="/schools/create">
+          <Link to="/admin/schools/create">
             <Plus className="mr-2 h-4 w-4" /> Tambah Sekolah
           </Link>
         </Button>

@@ -14,6 +14,12 @@ type CreateSchoolRequest struct {
 	Subdomain       string `json:"subdomain"`
 	Address         string `json:"address"`
 	Logo            string `json:"logo"`
+	Phone           string `json:"phone"`
+	Email           string `json:"email"`
+	Facebook        string `json:"facebook"`
+	Twitter         string `json:"twitter"`
+	Instagram       string `json:"instagram"`
+	Youtube         string `json:"youtube"`
 }
 
 func CreateSchool(c *gin.Context) {
@@ -38,12 +44,17 @@ func CreateSchool(c *gin.Context) {
 	// Begin transaction
 	tx := database.DB.Begin()
 
-	// 1. Create School
 	school := models.School{
 		Name:      req.Name,
 		Subdomain: req.Subdomain,
 		Address:   req.Address,
 		Logo:      req.Logo,
+		Phone:     req.Phone,
+		Email:     req.Email,
+		Facebook:  req.Facebook,
+		Twitter:   req.Twitter,
+		Instagram: req.Instagram,
+		Youtube:   req.Youtube,
 	}
 
 	if err := tx.Create(&school).Error; err != nil {
@@ -152,6 +163,12 @@ func UpdateSchool(c *gin.Context) {
 		Subdomain string `json:"subdomain"`
 		Address   string `json:"address"`
 		Logo      string `json:"logo"`
+		Phone     string `json:"phone"`
+		Email     string `json:"email"`
+		Facebook  string `json:"facebook"`
+		Twitter   string `json:"twitter"`
+		Instagram string `json:"instagram"`
+		Youtube   string `json:"youtube"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -163,6 +180,12 @@ func UpdateSchool(c *gin.Context) {
 	school.Subdomain = req.Subdomain
 	school.Address = req.Address
 	school.Logo = req.Logo
+	school.Phone = req.Phone
+	school.Email = req.Email
+	school.Facebook = req.Facebook
+	school.Twitter = req.Twitter
+	school.Instagram = req.Instagram
+	school.Youtube = req.Youtube
 
 	if err := database.DB.Save(&school).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal mengupdate sekolah"})
@@ -306,4 +329,9 @@ func UnassignAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Admin berhasil di-unassign"})
+}
+func GetPublicSchools(c *gin.Context) {
+	var schools []models.School
+	database.DB.Find(&schools)
+	c.JSON(http.StatusOK, schools)
 }

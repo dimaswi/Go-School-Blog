@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { useAuth } from "@/context/AuthContext"
@@ -15,6 +15,30 @@ export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
 
+  // Handle SSO via URL parameter `?token=...`
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const ssoToken = params.get("token")
+    if (ssoToken) {
+      setIsLoading(true)
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+      axios.get(`${apiUrl}/me`, {
+        headers: { Authorization: `Bearer ${ssoToken}` }
+      })
+      .then(res => {
+        login(ssoToken, res.data)
+        navigate("/admin")
+      })
+      .catch(err => {
+        console.error("SSO Login Failed", err)
+        setError("Login otomatis (SSO) gagal. Silakan login manual.")
+        setIsLoading(false)
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+      })
+    }
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -29,7 +53,7 @@ export default function Login() {
 
       const { token, user } = response.data
       login(token, user)
-      navigate("/")
+      navigate("/admin")
     } catch (err: any) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message)

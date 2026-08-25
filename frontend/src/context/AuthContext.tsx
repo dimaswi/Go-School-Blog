@@ -6,6 +6,7 @@ interface User {
   identifier: string;
   role: string;
   permissions?: string[];
+  school_id?: number | null;
 }
 
 interface AuthContextType {

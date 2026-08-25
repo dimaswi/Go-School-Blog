@@ -1,18 +1,32 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { resolveAssetUrl } from '@/lib/runtime';
+import { resolveAssetUrl, getApiBase } from '@/lib/runtime';
 
 interface SiteConfig {
+  appName: string;
   schoolName: string;
   logoUrl: string;
+  phone: string;
+  email: string;
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  youtube: string;
 }
 
 const SiteConfigContext = createContext<SiteConfig | undefined>(undefined);
 
 export function SiteConfigProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<SiteConfig>({
-    schoolName: "SiAK",
-    logoUrl: ""
+    appName: "Literasi Digital",
+    schoolName: "Literasi Digital",
+    logoUrl: "",
+    phone: "",
+    email: "",
+    facebook: "",
+    twitter: "",
+    instagram: "",
+    youtube: ""
   });
 
   useEffect(() => {
@@ -21,56 +35,44 @@ export function SiteConfigProvider({ children }: { children: React.ReactNode }) 
     const parts = hostname.split('.');
     const isSubdomain = parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'domain';
 
-    axios.get("http://localhost:8080/api/site-config")
-      .then(res => {
-        let newName = "SiAK";
-        let newLogo = "";
-
-        if (res.data?.school_name) {
-          newName = res.data.school_name;
-        }
-        if (res.data?.logo_url) {
-          newLogo = resolveAssetUrl(res.data.logo_url);
-        }
-
-        // If Super Admin, enforce defaults visually except title might just be SiAK Admin Portal
-        if (!isSubdomain) {
-          newName = "SiAK";
-          newLogo = "";
-        }
-
-        setConfig({ schoolName: newName, logoUrl: newLogo });
-
-        // Update DOM dynamically
-        document.title = `${newName} - Admin Portal`;
-
-        // Update favicon
-        if (newLogo) {
-          const img = new Image();
-          img.crossOrigin = "Anonymous"; // In case of CORS
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const size = Math.max(img.width, img.height);
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              const x = (size - img.width) / 2;
-              const y = (size - img.height) / 2;
-              ctx.drawImage(img, x, y);
-              
-              const dataUrl = canvas.toDataURL("image/png");
-              const existingLinks = document.querySelectorAll("link[rel~='icon']");
-              existingLinks.forEach(l => l.remove());
-    
-              const newLink = document.createElement('link');
-              newLink.rel = 'icon';
-              newLink.href = dataUrl;
-              document.head.appendChild(newLink);
-            }
+      axios.get(`${getApiBase()}/site-config`)
+        .then(res => {
+          let newConfig = {
+            appName: res.data.app_name || res.data.school_name || "Literasi Digital",
+            schoolName: res.data.school_name || "Literasi Digital",
+            logoUrl: (res.data?.logo_url || res.data?.logo) ? resolveAssetUrl(res.data.logo_url || res.data.logo) : "",
+            phone: res.data?.phone || "",
+            email: res.data?.email || "",
+            facebook: res.data?.facebook || "",
+            twitter: res.data?.twitter || "",
+            instagram: res.data?.instagram || "",
+            youtube: res.data?.youtube || ""
           };
-          img.src = newLogo;
-        }
+
+          // If Super Admin, enforce title defaults but keep the contact info
+          if (!isSubdomain) {
+            newConfig.schoolName = newConfig.appName || "Literasi Digital";
+            // Don't override logoUrl if it's already set via settings
+          }
+
+          setConfig(newConfig);
+
+          // Update DOM dynamically
+          const isAdminRoute = window.location.pathname.startsWith('/admin');
+          document.title = isAdminRoute 
+            ? `${newConfig.appName || newConfig.schoolName} - Admin Portal`
+            : `${newConfig.appName || newConfig.schoolName}`;
+
+          // Update favicon
+          if (newConfig.logoUrl) {
+            let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'icon';
+              document.head.appendChild(link);
+            }
+            link.href = newConfig.logoUrl;
+          }
       })
       .catch(console.error);
   }, []);

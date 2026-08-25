@@ -3,18 +3,67 @@ version: '3.8'
 services:
   db:
     image: postgres:15-alpine
-    container_name: starter_db_dev
+    container_name: gsb_db
     env_file:
       - .env
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "${DB_PORT}:5432"
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-go_school_blog}
+      # Membatasi shared buffers untuk mengurangi penggunaan RAM Postgres
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    command: postgres -c shared_buffers=32MB -c max_connections=50 -c work_mem=4MB -c effective_cache_size=128MB
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gsb_backend
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=${DB_NAME:-go_school_blog}
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      - db
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Isi ini saat proses build melalui file .env, atau hardcode jika perlu
+        - VITE_API_URL=${VITE_API_URL:-/api}
+    container_name: gsb_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
 volumes:
   postgres_data:
+  backend_uploads:

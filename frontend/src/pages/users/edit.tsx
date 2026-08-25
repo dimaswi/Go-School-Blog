@@ -7,8 +7,10 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { useAppDialog } from "@/context/AppDialogContext"
+import { toast } from "react-hot-toast"
+import { getApiBase } from "@/lib/runtime"
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+const API_URL = getApiBase()
 
 export default function UserEdit() {
   const { id } = useParams()
@@ -68,8 +70,10 @@ export default function UserEdit() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      navigate("/users")
-    } catch (err) {
+      toast.success("User berhasil diperbarui")
+      navigate("/admin/users")
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Gagal memperbarui user")
       console.error(err)
     } finally {
       setLoading(false)
@@ -94,9 +98,9 @@ export default function UserEdit() {
       await axios.put(`${API_URL}/users/${id}/password`, { password: newPassword }, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      await dialog.alert("Password berhasil diperbarui")
+      toast.success("Password berhasil diperbarui")
     } catch (err: any) {
-      await dialog.alert(err.response?.data?.message || "Gagal mengubah password")
+      toast.error(err.response?.data?.message || "Gagal mengubah password")
     }
   }
 
@@ -109,7 +113,7 @@ export default function UserEdit() {
       <div className="px-4 md:px-6 lg:px-8 pt-4 pb-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild className="rounded-full bg-white shadow-sm border border-slate-200 h-9 w-9">
-            <Link to="/users">
+            <Link to="/admin/users">
               <ArrowLeft className="w-4 h-4 text-slate-600" />
             </Link>
           </Button>
@@ -162,7 +166,7 @@ export default function UserEdit() {
 
       <div className="sticky bottom-0 z-50 flex justify-end gap-3 bg-background/95 backdrop-blur border-t p-4 mt-auto shadow-sm">
         <Button type="button" variant="outline" asChild>
-          <Link to="/users">Batal</Link>
+          <Link to="/admin/users">Batal</Link>
         </Button>
         <Button type="submit" form="user-form" disabled={loading || initialLoading} className="min-w-[140px]">
           {loading ? (

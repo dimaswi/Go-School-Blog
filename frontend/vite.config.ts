@@ -7,7 +7,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, path.resolve(process.cwd(), '../'), '')
   
   return {
-    base: '/admin/',
     envDir: '../', // Memberitahu vite untuk mencari .env di parent folder
     plugins: [react()],
     server: {

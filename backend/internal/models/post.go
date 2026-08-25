@@ -19,7 +19,8 @@ type Post struct {
 	Category     Category  `json:"category" gorm:"foreignKey:CategoryID"`
 	AuthorID     uint      `json:"author_id"`
 	Author       User      `json:"author" gorm:"foreignKey:AuthorID"`
-	SchoolID     uint      `json:"school_id"`
-	School       School    `json:"school" gorm:"foreignKey:SchoolID"`
+	SchoolID     *uint     `json:"school_id"`
+	School       *School   `json:"school" gorm:"foreignKey:SchoolID"`
 	PublishedAt  *time.Time `json:"published_at"`
+	MainDomainStatus string `json:"main_domain_status" gorm:"default:'none'"` // 'none', 'pending', 'approved', 'rejected'
 }

@@ -6,6 +6,7 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import axios from "axios"
+import { toast } from "react-hot-toast"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
 
@@ -43,8 +44,10 @@ export default function RoleCreate() {
       await axios.post(`${API_URL}/roles`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      navigate("/roles")
-    } catch (err) {
+      toast.success("Role berhasil dibuat")
+      navigate("/admin/roles")
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Gagal membuat role")
       console.error(err)
     } finally {
       setLoading(false)
@@ -66,7 +69,7 @@ export default function RoleCreate() {
       <div className="px-4 md:px-6 lg:px-8 pt-4 pb-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild className="rounded-full bg-white shadow-sm border border-slate-200 h-9 w-9">
-            <Link to="/roles">
+            <Link to="/admin/roles">
               <ArrowLeft className="w-4 h-4 text-slate-600" />
             </Link>
           </Button>
@@ -131,7 +134,7 @@ export default function RoleCreate() {
 
       <div className="sticky bottom-0 z-50 flex justify-end gap-3 bg-background/95 backdrop-blur border-t p-4 mt-auto shadow-sm">
         <Button type="button" variant="outline" asChild>
-          <Link to="/roles">Batal</Link>
+          <Link to="/admin/roles">Batal</Link>
         </Button>
         <Button type="submit" form="role-form" disabled={loading} className="min-w-[140px]">
           {loading ? (

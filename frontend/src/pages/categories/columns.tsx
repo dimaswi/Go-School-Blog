@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Eye, Edit, Trash, CornerDownRight } from "lucide-react"
+import { Edit, Trash, CornerDownRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import axios from "axios"
@@ -16,7 +16,7 @@ export type Category = {
   parent?: Category
 }
 
-export const columns = (onDeleted: () => void): ColumnDef<Category>[] => [
+export const columns = (onDeleted: () => void, confirmAction: (msg: string, title?: string) => Promise<boolean>): ColumnDef<Category>[] => [
   {
     accessorKey: "name",
     header: "Nama Rubrik",
@@ -59,7 +59,8 @@ export const columns = (onDeleted: () => void): ColumnDef<Category>[] => [
       const category = row.original
 
       const handleDelete = async () => {
-        if (!confirm(`Hapus rubrik ${category.name}?`)) return
+        const confirmed = await confirmAction(`Hapus rubrik ${category.name}?`, "Hapus Rubrik");
+        if (!confirmed) return
         
         try {
           const token = localStorage.getItem("token")
@@ -77,7 +78,7 @@ export const columns = (onDeleted: () => void): ColumnDef<Category>[] => [
       return (
         <div className="flex items-center gap-2 justify-end">
           <Button variant="outline" size="sm" asChild>
-            <Link to={`/categories/${category.ID}/edit`}>
+            <Link to={`/admin/categories/${category.ID}/edit`}>
               <Edit className="h-4 w-4 text-muted-foreground" />
               <span className="sr-only">Edit Kategori</span>
             </Link>
