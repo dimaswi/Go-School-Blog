@@ -35,3 +35,7 @@ uploads/
 storage/
 tmp/
 *.log
+*.sql
+
+# Folder 
+/cmd/api/uploads
