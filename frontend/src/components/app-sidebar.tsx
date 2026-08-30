@@ -86,7 +86,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Menu Konten
   const kontenItems: any[] = []
   if (isAdmin || user?.permissions?.includes("categories.view")) {
+  if (!isSubdomain) {
     kontenItems.push({ title: "Rubrik (Nav)", url: "/admin/categories", icon: Tag })
+  }
   }
   if (isAdmin || user?.permissions?.includes("posts.view")) {
     kontenItems.push({ title: "Artikel Berita", url: "/admin/posts", icon: FileText })

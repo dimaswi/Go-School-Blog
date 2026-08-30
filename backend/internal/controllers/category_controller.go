@@ -15,16 +15,8 @@ func GetCategories(c *gin.Context) {
 	var categories []models.Category
 	query := database.DB.Preload("Parent").Order("position asc")
 
-	// Apply tenant filter
-	isTenant := c.GetBool("isTenant")
-	if isTenant {
-		schoolID, exists := c.Get("schoolId")
-		if exists {
-			query = query.Where("school_id = ?", schoolID)
-		}
-	} else {
-		query = query.Where("school_id IS NULL")
-	}
+	// Always fetch global categories (Super Admin)
+	query = query.Where("school_id IS NULL")
 
 	if err := query.Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch categories"})
@@ -47,14 +39,13 @@ func CreateCategory(c *gin.Context) {
 		return
 	}
 
-	var schoolIDPtr *uint
 	isTenant := c.GetBool("isTenant")
 	if isTenant {
-		if sID, exists := c.Get("schoolId"); exists {
-			parsedID := sID.(uint)
-			schoolIDPtr = &parsedID
-		}
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only Super Admin can manage categories"})
+		return
 	}
+
+	var schoolIDPtr *uint = nil
 
 	category := models.Category{
 		Name:         input.Name,
@@ -86,11 +77,11 @@ func UpdateCategory(c *gin.Context) {
 
 	isTenant := c.GetBool("isTenant")
 	if isTenant {
-		schoolID, _ := c.Get("schoolId")
-		query = query.Where("school_id = ?", schoolID)
-	} else {
-		query = query.Where("school_id IS NULL")
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only Super Admin can manage categories"})
+		return
 	}
+
+	query = query.Where("school_id IS NULL")
 
 	if err := query.First(&category).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found or unauthorized"})
@@ -133,11 +124,11 @@ func DeleteCategory(c *gin.Context) {
 
 	isTenant := c.GetBool("isTenant")
 	if isTenant {
-		schoolID, _ := c.Get("schoolId")
-		query = query.Where("school_id = ?", schoolID)
-	} else {
-		query = query.Where("school_id IS NULL")
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only Super Admin can manage categories"})
+		return
 	}
+
+	query = query.Where("school_id IS NULL")
 
 	if err := query.First(&category).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found or unauthorized"})
@@ -162,23 +153,16 @@ func ReorderCategories(c *gin.Context) {
 	}
 
 	isTenant := c.GetBool("isTenant")
-	var schoolIDPtr *uint
 	if isTenant {
-		if sID, exists := c.Get("schoolId"); exists {
-			parsedID := sID.(uint)
-			schoolIDPtr = &parsedID
-		}
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only Super Admin can manage categories"})
+		return
 	}
 
 	tx := database.DB.Begin()
 	for _, item := range items {
 		query := tx.Model(&models.Category{}).Where("id = ?", item.ID)
 		
-		if isTenant {
-			query = query.Where("school_id = ?", schoolIDPtr)
-		} else {
-			query = query.Where("school_id IS NULL")
-		}
+		query = query.Where("school_id IS NULL")
 
 		if err := query.Updates(map[string]interface{}{
 			"parent_id": item.ParentID,
@@ -199,15 +183,8 @@ func GetPublicCategories(c *gin.Context) {
 	var categories []models.Category
 	query := database.DB.Preload("Parent").Order("position asc")
 
-	isTenant := c.GetBool("isTenant")
-	if isTenant {
-		schoolID, exists := c.Get("schoolId")
-		if exists {
-			query = query.Where("school_id = ?", schoolID)
-		}
-	} else {
-		query = query.Where("school_id IS NULL")
-	}
+	// Always fetch global categories for public navigation
+	query = query.Where("school_id IS NULL")
 
 	if err := query.Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch categories"})

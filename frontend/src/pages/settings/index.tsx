@@ -30,7 +30,7 @@ export default function SettingsIndex() {
   useEffect(() => {
     const hostname = window.location.hostname;
     const parts = hostname.split('.');
-    const isSub = parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'domain';
+    const isSub = parts.length > 2 && parts[0] !== 'www';
     setIsSuperAdmin(!isSub);
 
     if (!isSub) {
