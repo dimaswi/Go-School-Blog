@@ -13,7 +13,7 @@ export type User = {
   subdomain?: string
 }
 
-export const columns: ColumnDef<User>[] = [
+export const getColumns = (onDelete: (id: string, name: string) => void): ColumnDef<User>[] => [
   {
     accessorKey: "name",
     header: "Name",
@@ -65,7 +65,7 @@ export const columns: ColumnDef<User>[] = [
               <span className="sr-only">Edit User</span>
             </Link>
           </Button>
-          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+          <Button variant="outline" size="sm" onClick={() => onDelete(user.id, user.name)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
             <Trash className="h-4 w-4" />
             <span className="sr-only">Delete</span>
           </Button>

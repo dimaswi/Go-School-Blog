@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search, X } from "lucide-react"
 import { Link } from "react-router-dom"
-import { columns } from "./columns"
+import { getColumns } from "./columns"
 import type { Role } from "./columns"
+import { useAppDialog } from "@/context/AppDialogContext"
+import { toast } from "react-hot-toast"
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
 
@@ -16,22 +18,49 @@ export default function RolesIndex() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        const response = await axios.get(`${API_URL}/roles`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        setData(response.data || [])
-      } catch (error) {
-        console.error("Failed to fetch roles", error)
-      } finally {
-        setLoading(false)
-      }
+  const { confirm } = useAppDialog()
+
+  const fetchRoles = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem("token")
+      const response = await axios.get(`${API_URL}/roles`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      })
+      setData(response.data || [])
+    } catch (error) {
+      console.error("Failed to fetch roles", error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchRoles()
   }, [])
+
+  const handleDelete = async (id: string, name: string) => {
+    const isConfirmed = await confirm(
+      `Apakah Anda yakin ingin menghapus role "${name}"?`,
+      "Hapus Role"
+    )
+
+    if (isConfirmed) {
+      try {
+        const token = localStorage.getItem("token")
+        await axios.delete(`${API_URL}/roles/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        })
+        toast.success("Role berhasil dihapus")
+        fetchRoles()
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "Gagal menghapus role")
+        console.error("Failed to delete role:", error)
+      }
+    }
+  }
+
+  const columns = getColumns(handleDelete)
 
   const filtered = data.filter((r) => 
     r.name.toLowerCase().includes(search.toLowerCase())

@@ -17,7 +17,7 @@ export type Role = {
   permissions: Permission[]
 }
 
-export const columns: ColumnDef<Role>[] = [
+export const getColumns = (onDelete: (id: string, name: string) => void): ColumnDef<Role>[] => [
   {
     accessorKey: "name",
     header: "Role Name",
@@ -58,7 +58,7 @@ export const columns: ColumnDef<Role>[] = [
               <span className="sr-only">Edit Role</span>
             </Link>
           </Button>
-          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+          <Button variant="outline" size="sm" onClick={() => onDelete(role.id, role.name)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
             <Trash className="h-4 w-4" />
             <span className="sr-only">Delete</span>
           </Button>
