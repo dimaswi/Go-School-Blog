@@ -262,6 +262,7 @@ func main() {
 	protected.GET("/users", controllers.GetUsers)
 	protected.POST("/users", controllers.CreateUser)
 	protected.PUT("/users/:id/password", controllers.UpdatePassword)
+	protected.DELETE("/users/:id", controllers.DeleteUser)
 
 	protected.GET("/roles", controllers.GetRoles)
 	protected.POST("/roles", controllers.CreateRole)

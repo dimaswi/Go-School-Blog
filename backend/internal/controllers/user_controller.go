@@ -167,3 +167,27 @@ func UpdatePassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil diperbarui"})
 }
+
+func DeleteUser(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+
+	if err := database.DB.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
+		return
+	}
+
+	// Jangan izinkan superadmin default dihapus (asumsi username "superadmin" atau ID 1)
+	if user.Username == "superadmin" {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Tidak dapat menghapus superadmin default"})
+		return
+	}
+
+	// Hapus user
+	if err := database.DB.Delete(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal menghapus user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User berhasil dihapus"})
+}
