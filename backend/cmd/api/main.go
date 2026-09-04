@@ -201,6 +201,9 @@ func main() {
 	api.GET("/public/posts/:slug", controllers.GetPublicPost)
 	api.GET("/public/ads", controllers.GetPublicAds)
 	api.GET("/public/announcement", controllers.GetPublicAnnouncement)
+	
+	// Social Crawler Meta Render Endpoint
+	api.GET("/public/meta", controllers.MetaRender)
 
 	// Serve Static Files
 	app.Static("/uploads", "./uploads")
