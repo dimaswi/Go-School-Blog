@@ -28,7 +28,7 @@ export const getColumns = (onDelete: (id: string, name: string) => void): Column
     cell: ({ row }) => {
       const user = row.original
       if (!user.subdomain) return <span className="text-gray-400">-</span>
-      
+
       const tenantUrl = getTenantUrl(user.subdomain)
 
       return (

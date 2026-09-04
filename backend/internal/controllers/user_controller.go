@@ -168,6 +168,52 @@ func UpdatePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password berhasil diperbarui"})
 }
 
+func UpdateUser(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+
+	if err := database.DB.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
+		return
+	}
+
+	var req struct {
+		Name     string `json:"name"`
+		Username string `json:"username"`
+		RoleID   uint   `json:"role_id"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Input tidak valid", "error": err.Error()})
+		return
+	}
+
+	// Cek username bentrok jika diubah
+	if req.Username != "" && req.Username != user.Username {
+		var existingUser models.User
+		if err := database.DB.Where("username = ?", req.Username).First(&existingUser).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{"message": "Username sudah digunakan"})
+			return
+		}
+		user.Username = req.Username
+	}
+
+	if req.Name != "" {
+		user.Name = req.Name
+	}
+	
+	if req.RoleID != 0 {
+		user.RoleID = req.RoleID
+	}
+
+	if err := database.DB.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal memperbarui data user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User berhasil diperbarui", "user": user})
+}
+
 func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
