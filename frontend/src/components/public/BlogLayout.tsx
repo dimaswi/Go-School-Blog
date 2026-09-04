@@ -230,8 +230,8 @@ export default function BlogLayout() {
               const isSchoolList = cat.is_school_list || cat.slug === 'sekolahku';
 
               if (isSchoolList) {
-                const displaySchools = schools.slice(0, 5);
-                const hasMore = schools.length > 5;
+                const displaySchools = schools.slice(0, 10);
+                const hasMore = schools.length > 10;
                 return (
                   <DropdownMenu key={cat.ID}>
                     <DropdownMenuTrigger className={`flex items-center gap-1.5 h-full px-4 border-b-2 transition-colors duration-200 focus:outline-none cursor-pointer data-[state=open]:border-blue-600 data-[state=open]:text-blue-600 dark:data-[state=open]:border-blue-400 dark:data-[state=open]:text-blue-400 ${isActive ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400' : 'text-slate-700 dark:text-slate-300 border-transparent hover:text-blue-600 dark:hover:text-blue-400 hover:border-slate-300 dark:hover:border-slate-700'}`}>

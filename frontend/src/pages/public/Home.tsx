@@ -41,8 +41,8 @@ interface Ad {
 }
 
 export default function Home() {
-  const [latestPosts, setLatestPosts] = useState<Post[]>([]);
-  const [popularPosts, setPopularPosts] = useState<Post[]>([]);
+  const [mainPosts, setMainPosts] = useState<Post[]>([]);
+  const [secondaryPosts, setSecondaryPosts] = useState<Post[]>([]);
   const [ads, setAds] = useState<Ad[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -54,35 +54,35 @@ export default function Home() {
   }, [slug]);
 
   useEffect(() => {
-    const latestUrl = slug 
+    const mainUrl = slug 
       ? `${getApiBase()}/public/posts?category=${slug}&limit=12&page=${page}`
-      : `${getApiBase()}/public/posts?limit=10`;
+      : `${getApiBase()}/public/posts?sort=views&limit=10`;
       
     const adsUrl = `${getApiBase()}/public/ads?page_target=home`;
-    const popularUrl = `${getApiBase()}/public/posts?sort=views&limit=6`;
+    const secondaryUrl = `${getApiBase()}/public/posts?limit=6`;
       
     Promise.all([
-      axios.get(latestUrl),
+      axios.get(mainUrl),
       axios.get(adsUrl),
-      axios.get(popularUrl)
-    ]).then(([latestRes, adsRes, popularRes]) => {
-      // Handle paginated response for latestRes
-      const resData = latestRes.data;
+      axios.get(secondaryUrl)
+    ]).then(([mainRes, adsRes, secondaryRes]) => {
+      // Handle paginated response for mainRes
+      const resData = mainRes.data;
       if (resData && typeof resData === 'object' && 'data' in resData) {
-        setLatestPosts(resData.data || []);
+        setMainPosts(resData.data || []);
         setTotalPages(resData.last_page || 1);
       } else {
-        setLatestPosts(Array.isArray(resData) ? resData : []);
+        setMainPosts(Array.isArray(resData) ? resData : []);
         setTotalPages(1);
       }
       setAds(adsRes.data || []);
 
-      // Handle popularRes
-      const popData = popularRes.data;
-      if (popData && typeof popData === 'object' && 'data' in popData) {
-        setPopularPosts(popData.data || []);
+      // Handle secondaryRes
+      const secData = secondaryRes.data;
+      if (secData && typeof secData === 'object' && 'data' in secData) {
+        setSecondaryPosts(secData.data || []);
       } else {
-        setPopularPosts(Array.isArray(popData) ? popData : []);
+        setSecondaryPosts(Array.isArray(secData) ? secData : []);
       }
     }).catch(console.error);
   }, [slug, page]);
@@ -95,18 +95,18 @@ export default function Home() {
   const hasSidebarAds = !!(adSidebar1 || adSidebar2)
 
   // We only show the grid list for items after the slider or we show all if no slider
-  const gridPosts = latestPosts;
+  const gridPosts = mainPosts;
 
   // Ensure slider always has enough slides for loop to fill left+right without gaps
-  const sliderPosts = latestPosts.length === 0 ? [] : (
-    latestPosts.length >= 5 ? latestPosts :
-    Array.from({ length: Math.ceil(6 / latestPosts.length) }, () => latestPosts).flat()
+  const sliderPosts = mainPosts.length === 0 ? [] : (
+    mainPosts.length >= 5 ? mainPosts :
+    Array.from({ length: Math.ceil(6 / mainPosts.length) }, () => mainPosts).flat()
   );
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Modern Slider section - ONLY show on homepage (no slug) */}
-      {!slug && latestPosts.length > 0 && (
+      {!slug && mainPosts.length > 0 && (
         <div className="mb-12 relative w-full overflow-hidden">
           <Swiper
             effect={'coverflow'}
@@ -205,7 +205,7 @@ export default function Home() {
         <div className={hasSidebarAds ? 'lg:col-span-2' : 'lg:col-span-3'}>
           <div className="flex items-center gap-2 mb-6">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white border-l-4 border-blue-600 pl-3">
-              {slug ? `Kategori: ${slug.replace(/-/g, ' ')}` : 'Terbaru'}
+              {slug ? `Kategori: ${slug.replace(/-/g, ' ')}` : 'Terpopuler'}
             </h2>
           </div>
 
@@ -361,16 +361,16 @@ export default function Home() {
               </div>
             </div>
 
-              {/* Terpopuler section */}
-              {popularPosts.length > 0 && (
+              {/* Terbaru section (bottom) */}
+              {secondaryPosts.length > 0 && (
                 <div className="mt-8 border-t border-slate-100 dark:border-slate-800 pt-8">
                   <div className="flex items-center gap-2 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white border-l-4 border-red-500 pl-3">
-                      Terpopuler
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white border-l-4 border-emerald-500 pl-3">
+                      Terbaru
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {popularPosts.map(post => (
+                    {secondaryPosts.map(post => (
                       <Link to={`/post/${post.slug}`} key={`pop-${post.ID}`} className="flex flex-col gap-3 group">
                         <div className="aspect-video overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
                           <img
@@ -386,9 +386,8 @@ export default function Home() {
                           </h3>
                           <div className="flex items-center justify-between text-xs text-slate-500">
                             <span>{post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
-                            <span className="font-semibold text-red-500 bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                              {post.views || 0}
+                            <span className="font-semibold text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              Baru
                             </span>
                           </div>
                         </div>

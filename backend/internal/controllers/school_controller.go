@@ -332,6 +332,13 @@ func UnassignAdmin(c *gin.Context) {
 }
 func GetPublicSchools(c *gin.Context) {
 	var schools []models.School
-	database.DB.Find(&schools)
+	// Order by total views from posts
+	database.DB.Table("schools").
+		Select("schools.*, COALESCE(SUM(posts.views), 0) as total_views").
+		Joins("LEFT JOIN posts ON posts.school_id = schools.id AND posts.deleted_at IS NULL").
+		Where("schools.deleted_at IS NULL").
+		Group("schools.id").
+		Order("total_views DESC").
+		Find(&schools)
 	c.JSON(http.StatusOK, schools)
 }
