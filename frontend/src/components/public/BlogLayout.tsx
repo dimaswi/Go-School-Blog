@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useSiteConfig } from '@/context/SiteConfigContext';
-import { Search, Moon, Sun, Phone, ChevronDown, Mail, Check, Megaphone, Menu, X } from 'lucide-react';
+import { Search, Moon, Sun, Phone, ChevronDown, Mail, Check, Megaphone, Menu, X, Eye } from 'lucide-react';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { getApiBase, getTenantUrl } from '@/lib/runtime';
 
@@ -428,6 +428,8 @@ export default function BlogLayout() {
                       <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800/80 rounded font-medium text-slate-600 dark:text-slate-300">{post.category?.name || 'Umum'}</span>
                       <span className="opacity-50">&bull;</span>
                       <span>{new Date(post.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      <span className="opacity-50">&bull;</span>
+                      <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
                     </span>
                   </div>
                 </CommandItem>

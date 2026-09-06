@@ -4,6 +4,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import { Eye } from 'lucide-react';
 import { resolveAssetUrl, getApiBase } from '@/lib/runtime';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -159,6 +160,8 @@ export default function Home() {
                       </span>
                       <span>&bull;</span>
                       <span>{post.published_at ? format(new Date(post.published_at), 'dd MMM yyyy', { locale: id }) : 'Unknown date'}</span>
+                      <span>&bull;</span>
+                      <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -235,6 +238,8 @@ export default function Home() {
                         <span>{post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
                         <span>•</span>
                         <span>{post.author?.name || 'Admin'}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
                       </div>
                       <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
                         {post.excerpt || '...'}
@@ -303,9 +308,10 @@ export default function Home() {
                       <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2">
                         {post.title}
                       </h3>
-                      <span className="text-xs text-slate-400">
-                        {post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}
-                      </span>
+                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                        <span>{post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
+                        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -330,9 +336,10 @@ export default function Home() {
                     </div>
                     <div className="absolute bottom-0 left-0 p-4">
                       <h3 className="text-white font-extrabold text-base leading-snug line-clamp-2">{gridPosts[0].title}</h3>
-                      <span className="text-slate-300 text-xs mt-1 block">
-                        {gridPosts[0].published_at ? format(new Date(gridPosts[0].published_at), 'MMM dd, yyyy', { locale: id }) : ''}
-                      </span>
+                      <div className="flex items-center gap-3 text-slate-300 text-xs mt-1">
+                        <span>{gridPosts[0].published_at ? format(new Date(gridPosts[0].published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
+                        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {gridPosts[0].views || 0}</span>
+                      </div>
                     </div>
                   </Link>
                 )}
@@ -352,9 +359,10 @@ export default function Home() {
                       <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {post.title}
                       </h3>
-                      <span className="text-xs text-slate-400">
-                        {post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}
-                      </span>
+                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                        <span>{post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
+                        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -385,7 +393,10 @@ export default function Home() {
                             {post.title}
                           </h3>
                           <div className="flex items-center justify-between text-xs text-slate-500">
-                            <span>{post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
+                            <div className="flex items-center gap-3">
+                              <span>{post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy', { locale: id }) : ''}</span>
+                              <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
+                            </div>
                             <span className="font-semibold text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
                               Baru
                             </span>

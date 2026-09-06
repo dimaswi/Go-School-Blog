@@ -4,6 +4,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { resolveAssetUrl, getApiBase } from '@/lib/runtime';
+import { Eye } from 'lucide-react';
 
 interface Ad {
   id: number;
@@ -20,6 +21,7 @@ interface Post {
   content: string;
   thumbnail_url: string;
   published_at: string;
+  views?: number;
   author: {
     name: string;
   };
@@ -108,6 +110,11 @@ export default function PostDetail() {
               {post.category.name}
             </Link>
           )}
+
+          <span className="hidden sm:inline">&bull;</span>
+          <span className="flex items-center gap-1 font-medium">
+            <Eye className="w-4 h-4" /> {post.views || 0} x dibaca
+          </span>
         </div>
       </div>
 
