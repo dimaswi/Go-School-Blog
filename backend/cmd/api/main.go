@@ -201,6 +201,9 @@ func main() {
 	api.GET("/public/posts/:slug", controllers.GetPublicPost)
 	api.GET("/public/ads", controllers.GetPublicAds)
 	api.GET("/public/announcement", controllers.GetPublicAnnouncement)
+	
+	// Social Crawler Meta Render Endpoint
+	api.GET("/public/meta", controllers.MetaRender)
 
 	// Serve Static Files
 	app.Static("/uploads", "./uploads")
@@ -262,6 +265,7 @@ func main() {
 	protected.GET("/users", controllers.GetUsers)
 	protected.POST("/users", controllers.CreateUser)
 	protected.PUT("/users/:id/password", controllers.UpdatePassword)
+	protected.PUT("/users/:id", controllers.UpdateUser)
 	protected.DELETE("/users/:id", controllers.DeleteUser)
 
 	protected.GET("/roles", controllers.GetRoles)

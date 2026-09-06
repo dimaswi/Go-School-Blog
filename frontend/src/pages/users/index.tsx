@@ -77,9 +77,9 @@ export default function UsersIndex() {
         {loading ? (
           <div className="flex justify-center p-8">Loading...</div>
         ) : (
-          <DataTable 
-            columns={columns} 
-            data={data} 
+          <DataTable
+            columns={columns}
+            data={data}
             enableSearch={true}
             searchPlaceholder="Cari nama atau username..."
           />

@@ -111,7 +111,7 @@ export default function UserCreate() {
                     </SelectTrigger>
                     <SelectContent>
                       {roles.map(r => (
-                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                        <SelectItem key={r.id} value={r.id.toString()}>{r.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

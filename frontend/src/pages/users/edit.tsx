@@ -16,7 +16,7 @@ export default function UserEdit() {
   const { id } = useParams()
   const navigate = useNavigate()
   const dialog = useAppDialog()
-  
+
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [roles, setRoles] = useState<any[]>([])
@@ -32,14 +32,14 @@ export default function UserEdit() {
       try {
         const token = localStorage.getItem("token")
         const headers = { Authorization: `Bearer ${token}` }
-        
+
         const [rolesRes, usersRes] = await Promise.all([
           axios.get(`${API_URL}/roles`, { headers }),
           axios.get(`${API_URL}/users`, { headers }) // Mock fetching single user via array for now
         ])
-        
+
         setRoles(rolesRes.data || [])
-        
+
         const user = usersRes.data.find((u: any) => u.id === id)
         if (user) {
           // Cari role_id berdasarkan nama role karena API getUsers mungkin cuma kirim nama role
@@ -47,7 +47,7 @@ export default function UserEdit() {
           setFormData({
             name: user.name,
             username: user.username,
-            role_id: userRole ? userRole.id : ""
+            role_id: userRole ? userRole.id.toString() : ""
           })
         }
       } catch (err) {
@@ -146,7 +146,7 @@ export default function UserEdit() {
                   </SelectTrigger>
                   <SelectContent>
                     {roles.map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      <SelectItem key={r.id} value={r.id.toString()}>{r.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -39,6 +39,13 @@ export default function AdEdit() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null
+    if (selectedFile && selectedFile.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran file melebihi batas (Maksimal 2MB)");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
     setFile(selectedFile)
     setImageOrientation(null)
     setShowOrientationWarning(false)

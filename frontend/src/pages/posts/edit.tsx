@@ -99,6 +99,11 @@ export default function PostEdit() {
     if (!e.target.files || e.target.files.length === 0) return
     
     const file = e.target.files[0]
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran file melebihi batas (Maksimal 2MB)");
+      return;
+    }
+
     const data = new FormData()
     data.append("file", file)
 
