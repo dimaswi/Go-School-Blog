@@ -430,12 +430,8 @@ func GetPublicPosts(c *gin.Context) {
 		var category models.Category
 		catQuery := database.DB.Where("slug = ?", categorySlug)
 		
-		if isTenant {
-			schoolID, _ := c.Get("schoolId")
-			catQuery = catQuery.Where("school_id = ?", schoolID)
-		} else {
-			catQuery = catQuery.Where("school_id IS NULL")
-		}
+		// All categories are global (managed by super admin), so they have school_id IS NULL.
+		catQuery = catQuery.Where("school_id IS NULL")
 
 		if err := catQuery.First(&category).Error; err == nil {
 			query = query.Where("category_id = ?", category.ID)
