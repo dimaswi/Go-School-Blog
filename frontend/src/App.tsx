@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppDialogProvider } from './context/AppDialogContext';
 import { SiteConfigProvider } from './context/SiteConfigContext';
@@ -9,6 +9,7 @@ import BlogLayout from './components/public/BlogLayout';
 import Home from './pages/public/Home';
 import PostDetail from './pages/public/PostDetail';
 import PublicSchools from './pages/public/PublicSchools';
+import NotFound from './pages/public/NotFound';
 import { Toaster } from 'react-hot-toast';
 
 import UsersIndex from './pages/users/index';
@@ -68,6 +69,7 @@ function App() {
                 <Route path="/schools" element={<PublicSchools />} />
                 <Route path="/post/:slug" element={<PostDetail />} />
                 <Route path="/category/:slug" element={<Home />} />
+                <Route path="*" element={<NotFound type="page" />} />
               </Route>
 
               {/* Admin Routes */}
@@ -124,7 +126,6 @@ function App() {
                 </Route>
               </Route>
 
-              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Router>
         </AppDialogProvider>

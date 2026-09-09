@@ -422,8 +422,10 @@ func GetPublicPosts(c *gin.Context) {
 		query = query.Where("school_id = ?", schoolID)
 	} else {
 		// Root domain: super admin posts (school_id is null) OR approved tenant posts
-		query = query.Where("school_id IS NULL OR main_domain_status = ?", "approved")
+		query = query.Where("(school_id IS NULL OR main_domain_status = ?)", "approved")
 	}
+
+	var isTrending bool
 
 	// Filter by category slug
 	if categorySlug := c.Query("category"); categorySlug != "" {
@@ -434,7 +436,13 @@ func GetPublicPosts(c *gin.Context) {
 		catQuery = catQuery.Where("school_id IS NULL")
 
 		if err := catQuery.First(&category).Error; err == nil {
-			query = query.Where("category_id = ?", category.ID)
+			if category.IsTrending {
+				// If it's a trending rubric, we don't filter by category_id
+				// Instead, we force sorting by views
+				isTrending = true
+			} else {
+				query = query.Where("category_id = ?", category.ID)
+			}
 		} else {
 			// Category not found, return empty result
 			c.JSON(http.StatusOK, gin.H{
@@ -450,16 +458,18 @@ func GetPublicPosts(c *gin.Context) {
 	// Filter by search query
 	if search := c.Query("search"); search != "" {
 		searchPattern := "%" + search + "%"
-		query = query.Where("title LIKE ? OR excerpt LIKE ? OR content LIKE ?", searchPattern, searchPattern, searchPattern)
+		query = query.Where("(title LIKE ? OR excerpt LIKE ? OR content LIKE ?)", searchPattern, searchPattern, searchPattern)
 	}
 
 	// Count total before pagination and ordering
 	var total int64
 	query.Count(&total)
 
-	// Sort by views or created_at
-	if sortBy := c.Query("sort"); sortBy == "views" {
+	// Sort by views, random, or created_at
+	if sortBy := c.Query("sort"); sortBy == "views" || isTrending {
 		query = query.Order("views desc")
+	} else if sortBy == "random" {
+		query = query.Order("RANDOM()")
 	} else {
 		query = query.Order("published_at desc")
 	}

@@ -191,9 +191,11 @@ export default function PostCreate() {
                 form="post-form"
               >
                 <option value="">Pilih Rubrik...</option>
-                {categories.map((c) => (
-                  <option key={c.ID} value={c.ID}>{c.name}</option>
-                ))}
+                {categories
+                  .filter((c) => !c.is_trending && !c.is_school_list)
+                  .map((c) => (
+                    <option key={c.ID} value={c.ID}>{c.name}</option>
+                  ))}
               </select>
             </div>
             

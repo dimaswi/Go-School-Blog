@@ -19,6 +19,7 @@ export default function CategoryCreate() {
     slug: "",
     parent_id: "",
     is_school_list: false,
+    is_trending: false,
   })
 
   // Fetch categories on mount for the dropdown
@@ -131,6 +132,25 @@ export default function CategoryCreate() {
                 </Label>
                 <p className="text-xs text-slate-500">
                   Jika dicentang, menu ini akan otomatis menampilkan daftar semua sekolah yang terdaftar.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox
+                id="is_trending"
+                checked={formData.is_trending}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_trending: checked as boolean })}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label
+                  htmlFor="is_trending"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Jadikan menu ini sebagai Rubrik Trending
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Jika dicentang, rubrik ini akan menampilkan daftar berita yang paling banyak dibaca.
                 </p>
               </div>
             </div>

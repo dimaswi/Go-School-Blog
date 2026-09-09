@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { resolveAssetUrl, getApiBase } from '@/lib/runtime';
 import { Eye } from 'lucide-react';
+import NotFound from './NotFound';
 
 interface Ad {
   id: number;
@@ -77,7 +78,7 @@ export default function PostDetail() {
   }
 
   if (!post) {
-    return <div className="container mx-auto px-4 py-20 text-center">Post not found</div>;
+    return <NotFound type="article" />;
   }
 
   return (

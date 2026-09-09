@@ -129,7 +129,7 @@ export default function BlogLayout() {
     }
     const timer = setTimeout(() => {
       setIsSearching(true);
-      axios.get(`http://localhost:8080/api/public/posts?search=${encodeURIComponent(searchQuery)}&limit=10`)
+      axios.get(`${getApiBase()}/public/posts?search=${encodeURIComponent(searchQuery)}&limit=10`)
         .then(res => {
           setSearchResults(res.data.data || []);
         })

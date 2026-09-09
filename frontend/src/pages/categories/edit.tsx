@@ -21,6 +21,7 @@ export default function CategoryEdit() {
     slug: "",
     parent_id: "",
     is_school_list: false,
+    is_trending: false,
   })
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export default function CategoryEdit() {
             slug: category.slug,
             parent_id: category.parent_id ? category.parent_id.toString() : "",
             is_school_list: category.is_school_list || false,
+            is_trending: category.is_trending || false,
           })
           
           // Set parent categories for dropdown (exclude itself to prevent circular reference)
@@ -150,6 +152,25 @@ export default function CategoryEdit() {
                 </Label>
                 <p className="text-xs text-slate-500">
                   Jika dicentang, menu ini akan otomatis menampilkan daftar semua sekolah yang terdaftar.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox
+                id="is_trending"
+                checked={formData.is_trending}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_trending: checked as boolean })}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label
+                  htmlFor="is_trending"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Jadikan menu ini sebagai Rubrik Trending
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Jika dicentang, rubrik ini akan menampilkan daftar berita yang paling banyak dibaca.
                 </p>
               </div>
             </div>

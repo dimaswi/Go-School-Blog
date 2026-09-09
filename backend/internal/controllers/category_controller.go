@@ -32,6 +32,7 @@ func CreateCategory(c *gin.Context) {
 		Slug         string `json:"slug" binding:"required"`
 		ParentID     *uint  `json:"parent_id"`
 		IsSchoolList bool   `json:"is_school_list"`
+		IsTrending   bool   `json:"is_trending"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -53,6 +54,7 @@ func CreateCategory(c *gin.Context) {
 		ParentID:     input.ParentID,
 		SchoolID:     schoolIDPtr,
 		IsSchoolList: input.IsSchoolList,
+		IsTrending:   input.IsTrending,
 	}
 
 	if err := database.DB.Create(&category).Error; err != nil {
@@ -93,6 +95,7 @@ func UpdateCategory(c *gin.Context) {
 		Slug         string `json:"slug"`
 		ParentID     *uint  `json:"parent_id"`
 		IsSchoolList bool   `json:"is_school_list"`
+		IsTrending   bool   `json:"is_trending"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -105,6 +108,7 @@ func UpdateCategory(c *gin.Context) {
 		"slug":           input.Slug,
 		"parent_id":      input.ParentID,
 		"is_school_list": input.IsSchoolList,
+		"is_trending":    input.IsTrending,
 	})
 
 	c.JSON(http.StatusOK, category)

@@ -44,6 +44,7 @@ interface Ad {
 export default function Home() {
   const [mainPosts, setMainPosts] = useState<Post[]>([]);
   const [secondaryPosts, setSecondaryPosts] = useState<Post[]>([]);
+  const [randomPosts, setRandomPosts] = useState<Post[]>([]);
   const [ads, setAds] = useState<Ad[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -61,12 +62,14 @@ export default function Home() {
       
     const adsUrl = `${getApiBase()}/public/ads?page_target=home`;
     const secondaryUrl = `${getApiBase()}/public/posts?limit=6`;
+    const randomUrl = !slug ? `${getApiBase()}/public/posts?sort=random&limit=4` : null;
       
     Promise.all([
       axios.get(mainUrl),
       axios.get(adsUrl),
-      axios.get(secondaryUrl)
-    ]).then(([mainRes, adsRes, secondaryRes]) => {
+      axios.get(secondaryUrl),
+      randomUrl ? axios.get(randomUrl) : Promise.resolve({ data: [] })
+    ]).then(([mainRes, adsRes, secondaryRes, randomRes]) => {
       // Handle paginated response for mainRes
       const resData = mainRes.data;
       if (resData && typeof resData === 'object' && 'data' in resData) {
@@ -84,6 +87,16 @@ export default function Home() {
         setSecondaryPosts(secData.data || []);
       } else {
         setSecondaryPosts(Array.isArray(secData) ? secData : []);
+      }
+
+      // Handle randomRes
+      if (randomRes) {
+        const randData = randomRes.data;
+        if (randData && typeof randData === 'object' && 'data' in randData) {
+          setRandomPosts(randData.data || []);
+        } else {
+          setRandomPosts(Array.isArray(randData) ? randData : []);
+        }
       }
     }).catch(console.error);
   }, [slug, page]);
@@ -401,6 +414,36 @@ export default function Home() {
                               Baru
                             </span>
                           </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Random Posts section (bottom) */}
+              {!slug && randomPosts.length > 0 && (
+                <div className="mt-8 border-t border-slate-100 dark:border-slate-800 pt-8">
+                  <div className="flex items-center gap-2 mb-6">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white border-l-4 border-amber-500 pl-3">
+                      Berita Acak
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    {randomPosts.map(post => (
+                      <Link to={`/post/${post.slug}`} key={`rand-${post.ID}`} className="flex flex-col gap-3 group">
+                        <div className="aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                          <img
+                            src={resolveAssetUrl(post.thumbnail_url)}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1519681393784-d120267933ba' }}
+                          />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug line-clamp-3 group-hover:text-amber-600 transition-colors mb-2">
+                            {post.title}
+                          </h3>
                         </div>
                       </Link>
                     ))}

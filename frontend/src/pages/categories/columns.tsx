@@ -13,6 +13,7 @@ export type Category = {
   slug: string
   parent_id?: number
   is_school_list?: boolean
+  is_trending?: boolean
   parent?: Category
 }
 
@@ -26,6 +27,16 @@ export const columns = (onDeleted: () => void, confirmAction: (msg: string, titl
         <div className={`flex items-center gap-2 ${isChild ? "ml-6 text-muted-foreground" : "font-medium"}`}>
           {isChild && <CornerDownRight className="h-4 w-4 text-muted-foreground/50" />}
           <span>{row.original.name}</span>
+          {row.original.is_school_list && (
+            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase tracking-wider">
+              List Sekolah
+            </span>
+          )}
+          {row.original.is_trending && (
+            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+              Trending
+            </span>
+          )}
         </div>
       )
     }

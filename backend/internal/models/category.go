@@ -12,6 +12,7 @@ type Category struct {
 	SchoolID     *uint      `json:"school_id" gorm:"uniqueIndex:idx_name_school;uniqueIndex:idx_slug_school"`
 	Position     int        `json:"position" gorm:"default:0"`
 	IsSchoolList bool       `json:"is_school_list" gorm:"default:false"`
+	IsTrending   bool       `json:"is_trending" gorm:"default:false"`
 	Parent       *Category  `json:"parent" gorm:"foreignKey:ParentID"`
 	Children     []Category `json:"children" gorm:"foreignKey:ParentID"`
 	School       *School    `json:"school,omitempty" gorm:"foreignKey:SchoolID"`
