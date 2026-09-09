@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppDialogProvider } from './context/AppDialogContext';
 import { SiteConfigProvider } from './context/SiteConfigContext';
