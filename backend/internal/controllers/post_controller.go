@@ -113,9 +113,9 @@ func RequestMainDomain(c *gin.Context) {
 		return
 	}
 
-	post.MainDomainStatus = "pending"
+	post.MainDomainStatus = "approved"
 	if err := database.DB.Save(&post).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to submit request"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to approve request"})
 		return
 	}
 

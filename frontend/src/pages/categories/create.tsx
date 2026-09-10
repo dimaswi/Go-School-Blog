@@ -17,6 +17,7 @@ export default function CategoryCreate() {
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
+    description: "",
     parent_id: "",
     is_school_list: false,
     is_trending: false,
@@ -99,6 +100,17 @@ export default function CategoryCreate() {
                 required
               />
               <p className="text-xs text-slate-500">Slug digunakan untuk URL kategori.</p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">Deskripsi (Opsional)</Label>
+              <textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="Tulis deskripsi rubrik (hanya untuk internal admin)"
+              />
             </div>
 
             <div className="grid gap-2">

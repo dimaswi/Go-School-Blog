@@ -29,6 +29,7 @@ interface DataTableProps<TData, TValue> {
   enableSearch?: boolean
   searchPlaceholder?: string
   extraFilters?: React.ReactNode
+  defaultPageSize?: number
 }
 
 export function DataTable<TData, TValue>({
@@ -40,11 +41,12 @@ export function DataTable<TData, TValue>({
   enableSearch = false,
   searchPlaceholder = "Cari...",
   extraFilters,
+  defaultPageSize = 10,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("")
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: defaultPageSize,
   })
 
   const table = useReactTable({

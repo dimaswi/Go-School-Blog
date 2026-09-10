@@ -195,6 +195,7 @@ export default function PostsIndex() {
             columns={columns(fetchPosts, isSuperAdmin, isSchoolAdmin, confirm, handleMainDomainAction, handleSchoolAction)}
             data={filtered}
             enableSearch={false}
+            defaultPageSize={1000}
           />
         )}
       </div>

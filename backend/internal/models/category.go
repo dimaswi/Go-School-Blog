@@ -8,6 +8,7 @@ type Category struct {
 	gorm.Model
 	Name         string     `json:"name" gorm:"uniqueIndex:idx_name_school;not null"`
 	Slug         string     `json:"slug" gorm:"uniqueIndex:idx_slug_school;not null"`
+	Description  string     `json:"description" gorm:"type:text"`
 	ParentID     *uint      `json:"parent_id"`
 	SchoolID     *uint      `json:"school_id" gorm:"uniqueIndex:idx_name_school;uniqueIndex:idx_slug_school"`
 	Position     int        `json:"position" gorm:"default:0"`

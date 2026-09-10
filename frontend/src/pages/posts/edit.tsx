@@ -156,7 +156,7 @@ export default function PostEdit() {
         await axios.post(`${API_URL}/posts/${id}/request-main-domain`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         })
-        setFormData(prev => ({ ...prev, main_domain_status: "pending" }))
+        setFormData(prev => ({ ...prev, main_domain_status: "approved" }))
       } else if (action === "approve") {
         await axios.put(`${API_URL}/posts/${id}/approve-main-domain`, {}, {
           headers: { Authorization: `Bearer ${token}` }

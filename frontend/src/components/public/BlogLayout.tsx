@@ -317,6 +317,11 @@ export default function BlogLayout() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3 ml-auto">
+            <img 
+              src="/sponsor.png" 
+              alt="Sponsor" 
+              className="md:hidden max-h-8 w-auto object-contain shrink-0" 
+            />
             <button
               onClick={() => setIsSearchOpen(true)}
               className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-blue-600 transition-colors bg-slate-100 dark:bg-slate-900 py-1.5 px-3 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-600"
