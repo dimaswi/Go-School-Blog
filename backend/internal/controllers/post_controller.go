@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -308,8 +309,15 @@ func CreatePost(c *gin.Context) {
 		post.PublishedAt = &now
 	}
 
+	// Ensure unique slug
+	var count int64
+	database.DB.Model(&models.Post{}).Where("slug = ?", post.Slug).Count(&count)
+	if count > 0 {
+		post.Slug = fmt.Sprintf("%s-%d", post.Slug, time.Now().Unix())
+	}
+
 	if err := database.DB.Create(&post).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post: " + err.Error()})
 		return
 	}
 
