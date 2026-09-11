@@ -309,9 +309,9 @@ func CreatePost(c *gin.Context) {
 		post.PublishedAt = &now
 	}
 
-	// Ensure unique slug
+	// Ensure unique slug (including soft-deleted records)
 	var count int64
-	database.DB.Model(&models.Post{}).Where("slug = ?", post.Slug).Count(&count)
+	database.DB.Unscoped().Model(&models.Post{}).Where("slug = ?", post.Slug).Count(&count)
 	if count > 0 {
 		post.Slug = fmt.Sprintf("%s-%d", post.Slug, time.Now().Unix())
 	}

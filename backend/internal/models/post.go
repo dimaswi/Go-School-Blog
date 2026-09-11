@@ -14,7 +14,7 @@ type Post struct {
 	Excerpt      string    `json:"excerpt" gorm:"type:text"`
 	ThumbnailURL string    `json:"thumbnail_url"`
 	Views        int       `json:"views" gorm:"default:0"`
-	Status       string    `json:"status" gorm:"default:'draft'"` // 'draft' or 'published'
+	Status       string    `json:"status" gorm:"default:'published'"` // 'draft' or 'published'
 	CategoryID   uint      `json:"category_id"`
 	Category     Category  `json:"category" gorm:"foreignKey:CategoryID"`
 	AuthorID     uint      `json:"author_id"`

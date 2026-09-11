@@ -31,7 +31,7 @@ export default function PostCreate() {
     content: "",
     excerpt: "",
     thumbnail_url: "",
-    status: "draft",
+    status: "published",
     category_id: "",
   })
 
